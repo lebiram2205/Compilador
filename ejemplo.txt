@@ -1,0 +1,8 @@
+process ejemplo
+   read n;
+   for(int i)then
+      read n;
+   else
+     read n;
+   endif
+endprocess
