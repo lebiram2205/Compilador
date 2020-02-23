@@ -49,14 +49,14 @@ public class Alex implements LexicoAnalyzer {
 	 *            Lexema del Token
 	 */
 	private Token isKeyWord(String lexeme) {
-		for(TokenSubType ts:TokenSubType.values()) {
-			if(ts.getType().equals(lexeme))
-				return new Token(TokenType.KEY_WORD,ts,lexeme);
+		for (TokenSubType ts : TokenSubType.values()) {
+			if (ts.getType().equals(lexeme))
+				return new Token(TokenType.KEY_WORD, ts, lexeme);
 		}
 
-		return new Token(TokenType.IDENTIFIER,lexeme);
+		return new Token(TokenType.IDENTIFIER, lexeme);
 
-	}//fin del metodo
+	}// fin del metodo
 
 	@Override
 	// crea la lista de token
@@ -77,15 +77,15 @@ public class Alex implements LexicoAnalyzer {
 			 */
 			caracter = input.charAt(index);
 			/////////////////////////////////////////////////////////////////////////////////////////////////
-			if(caracter=='('){
+			if (caracter == '(') {
 
-				lexeme="";
-				lexeme=lexeme+caracter;
-				aux=new Token(TokenType.PARENTHESIS,TokenSubType.LEFT_PARENTHESIS,lexeme);
+				lexeme = "";
+				lexeme = lexeme + caracter;
+				aux = new Token(TokenType.PARENTHESIS, TokenSubType.LEFT_PARENTHESIS, lexeme);
 				aux.setLine(linea);
 				tlist.add(aux);
 				index++;
-			}else if (caracter == ')') {
+			} else if (caracter == ')') {
 
 				lexeme = "";
 				lexeme = lexeme + caracter;
@@ -94,8 +94,8 @@ public class Alex implements LexicoAnalyzer {
 				tlist.add(aux);
 				index++;
 			}
-			///////////////////////////////////////////////////////////////////////////////////////////////// ) 
-			
+			///////////////////////////////////////////////////////////////////////////////////////////////// )
+
 			else if (caracter == '<' || caracter == '>') {
 				lexeme = "";
 				lexeme = lexeme + caracter;
@@ -175,7 +175,7 @@ public class Alex implements LexicoAnalyzer {
 				}
 			}
 			///////////////////////////////////////////////////////////////////////////////////////////////// )
-			
+
 			else if (Character.isDigit(caracter)) {// Determina si el caracter es un digito
 
 				lexeme = "";
@@ -202,7 +202,7 @@ public class Alex implements LexicoAnalyzer {
 							valor = Character.isDigit(caracter);
 							if (valor) {
 								lexeme = lexeme + caracter;
-								
+
 								index++;
 							}
 						}
@@ -273,6 +273,7 @@ public class Alex implements LexicoAnalyzer {
 				aux.setLine(linea);
 				tlist.add(aux);
 				index++;
+
 			}
 			//// /////////////////////////////////////////////////////////////////////////////////////////////
 			//// )
@@ -286,20 +287,21 @@ public class Alex implements LexicoAnalyzer {
 			}
 			//// /////////////////////////////////////////////////////////////////////////////////////////////
 			//// )
-			
-			if(Character.isWhitespace(caracter)) {
-				if(caracter=='\n')
+
+			else if (Character.isWhitespace(caracter)) {
+				if (caracter == '\n')
 					linea++;
 				index++;
 			}
-//			else if (caracter == '\n' || caracter == '\t' || caracter == '\f' || caracter == '\r') {
-//				lexeme = "";
-//				lexeme = lexeme + caracter;
-//				aux = new Token(TokenType.WHITE_SPACE, TokenSubType.SPACE, lexeme);
-//				aux.setLine(linea);
-//				//tlist.add(aux);
-//				index++;
-//			}
+			// else if (caracter == '\n' || caracter == '\t' || caracter == '\f' || caracter
+			// == '\r') {
+			// lexeme = "";
+			// lexeme = lexeme + caracter;
+			// aux = new Token(TokenType.WHITE_SPACE, TokenSubType.SPACE, lexeme);
+			// aux.setLine(linea);
+			// //tlist.add(aux);
+			// index++;
+			// }
 			///////////////////////////////////////////////////////////////////////////////////////////// )
 			else if (caracter == '/') {
 				lexeme = "";
@@ -313,7 +315,7 @@ public class Alex implements LexicoAnalyzer {
 					index++;
 					aux = new Token(TokenType.COMMENT, lexeme);
 					aux.setLine(linea);
-					tlist.add(aux);//Poner que el lexema incremente hasta hallar \n
+					tlist.add(aux);// Poner que el lexema incremente hasta hallar \n
 				} else if (caracter == '*') {
 					index++;
 					while (index < input.length()) {
@@ -338,7 +340,7 @@ public class Alex implements LexicoAnalyzer {
 				}
 
 			}
-///////////////////////////////////////////////////////////////////////////////////////////// )
+			///////////////////////////////////////////////////////////////////////////////////////////// )
 			else if (caracter == '_' || Character.isLetter(caracter)) {
 				lexeme = "";
 				lexeme = lexeme + caracter;
@@ -355,17 +357,15 @@ public class Alex implements LexicoAnalyzer {
 					}
 
 				}
-				System.out.println(lexeme);
 
 				// si es una palabra recervada o no
 				aux = isKeyWord(lexeme);
 				aux.setLine(linea);
 				tlist.add(aux);
 
-			} 
+			}
 
-			
-///////////////////////////////////////////////////////////////////////////////////////////// )
+			///////////////////////////////////////////////////////////////////////////////////////////// )
 			else {
 				System.out.println("Caracter no reconocido: " + caracter);
 				index++;
@@ -402,7 +402,7 @@ public class Alex implements LexicoAnalyzer {
 	 * @see metodo createTokenList
 	 */
 	public void setBackToken(Token t) {
-		
+
 		tlist.add(0, t);
 	}
 
@@ -412,4 +412,3 @@ public class Alex implements LexicoAnalyzer {
 	}
 
 }// fin de la clase
-
