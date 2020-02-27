@@ -124,9 +124,145 @@ public class Parser {
 
 	}
 
-
-
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	private void EXPRESION() {
+		Y();
+		OP();
+	}
+	
+	private void Y() {
+		C();
+		YP();
+	}
+	
+	private void YP() {
+		Token aux;
+		aux=lexico.getToken();
+		if(aux!=null)
+			//if(aux.getLexema().equals("&&")) {
+			if(aux.getLexeme() == "&&") {
+				C();
+				YP();
+			}else {
+				lexico.setBackToken(aux);
+			}
+
+	}
+	
+	private void OP() {
+		Token aux;
+		aux=lexico.getToken();
+		if(aux != null)
+			//if(aux.getLexema().equals("||")) {
+			if(aux.getLexeme() == "||") {
+				Y();
+				OP();
+			}else {
+				lexico.setBackToken(aux);
+			}
+	}
+	
+	private void C() {
+		R();
+		CP();
+	}
+
+	private void CP() {
+
+		Token aux;
+		aux=lexico.getToken();
+		if(aux!=null)
+			//if(aux.getLexema().equals("==")||aux.getLexema().equals("!=")
+			if(aux.getLexeme() == "==" || aux.getLexeme() == "!=" ) {
+				R();
+				CP();
+			}else {
+				lexico.setBackToken(aux);
+			}
+
+	}
+
+
+	private void R() {
+		E();
+		RP();
+	}
+
+	private void RP() {
+		Token aux;
+		aux=lexico.getToken();
+		if(aux!=null)
+//			if(aux.getLexema().equals("<")||aux.getLexema().equals(">")
+//					||aux.getLexema().equals("<=")||aux.getLexema().equals(">=")) {
+			if(aux.getLexeme() == "<" || aux.getLexeme() == ">" 
+					|| aux.getLexeme() == "<=" || aux.getLexeme() == ">=") {
+				E();
+				RP();
+			}else {
+				lexico.setBackToken(aux);
+			}
+	}
+
+
+	private void E() {
+		T();
+		EP();
+	}
+	private void EP() {
+		Token aux;
+		aux=lexico.getToken();
+		if(aux!=null)
+			//if(aux.getLexema().equals("+")||aux.getLexema().equals("-")) {
+			if(aux.getLexeme() == "+" || aux.getLexeme() == "-") {
+				T();
+				EP();
+			}else {
+				lexico.setBackToken(aux);
+			}
+	}
+	private void T() {
+
+		F();
+		TP();
+
+	}
+
+	private void TP() {
+		Token aux;
+		aux=lexico.getToken();
+		if(aux!=null)
+			if(aux.getLexeme() == "*" ||aux.getLexeme() == "/" || aux.getLexeme() == "%") {
+				F();
+				TP();
+			}else {
+				lexico.setBackToken(aux);
+			}
+
+	}
+
+
+
+	private void F() {
+//		Token aux;
+//		aux=lexico.getToken();
+//		if(!(se_espera(aux,TokenType.IDENTIFIER)|| 
+//				se_espera(aux,TokenSubType.INTEGERNUMBER) || 
+//				se_espera(aux,TokenSubType.REALNUMBER) )) {
+//
+//			if(!(se_espera(aux,TokenSubType.LEFT_PARENTHESIS))){
+//
+//				errores.error("Error en linea "+aux.getLinea()+" se espera numero o identificador");				
+//			}else {
+//				EXPRESION();
+//				aux=lexico.getToken();
+//				if(!(se_espera(aux,TokenSubType.RIGHT_PARENTHESIS))){
+//					errores.error("Error en linea "+aux.getLinea()+" se espera )");				
+//
+//				}
+//
+//			}
+//
+//		}		
 
 	}
 
@@ -193,13 +329,17 @@ public class Parser {
 		return aux;
 	}
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+	private void WHILE() {
+		
+	}
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+	private void WRITE() {
+		
+	}
 
-
-
-
-
-
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
 	private void READ() {
 		Token aux;
 		String id;
