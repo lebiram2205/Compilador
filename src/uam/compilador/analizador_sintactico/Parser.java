@@ -86,9 +86,25 @@ public class Parser {
 		}
 		return false;
 	}
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	void PROCESS() {
+		Token aux;
+		aux=lexico.getToken();
+		if(!se_espera(aux,TokenSubType.PROCESS))
+			error(TokenSubType.PROCESS,aux.getLine());
+		aux=lexico.getToken();
+		if(!se_espera(aux,TokenType.IDENTIFIER))
+			error(TokenType.IDENTIFIER,aux.getLine());	
+		aux=lexico.getToken();
+		while(!se_espera(aux,TokenSubType.ENDPROCESS)&& aux!=null) {
+			lexico.setBackToken(aux);
+			aux=OPERACIONES();
+		}
+		if(aux==null) 
+			error(TokenSubType.ENDPROCESS);
 
-
-
+	}
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
 	 * Identifica que tipo de operacion a reconocer. Observe
@@ -123,8 +139,144 @@ public class Parser {
 		return false;
 
 	}
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////	
+	Token OPERACIONES() {
+		Token aux;
+		boolean f;
+		f=OPERACION();
+		if(!f) {
+			aux=lexico.getToken();
+			error("Error en linea "+aux.getLine()+" se recibio: "+aux.getLexeme());
+			aux=lexico.getToken();
+		}else
+			aux=lexico.getToken();
+		return aux;
+	}
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//DECLARACIONES 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//READ
+	private void READ() {
+		Token aux;
+		String id;
+		boolean salir=true;
+		aux=lexico.getToken();
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		if(!se_espera(aux,TokenSubType.READ))
+			error(TokenSubType.READ,aux.getLine());
+
+		do {
+			aux=lexico.getToken();
+			if(!se_espera(aux,TokenType.IDENTIFIER)){
+				error(TokenType.IDENTIFIER,aux.getLine()); 
+			}
+			aux=lexico.getToken();
+			salir=se_espera(aux,TokenSubType.COMMA);
+			if(!salir) {
+				if(!se_espera(aux,TokenSubType.SEMICOLON)){
+					error(TokenSubType.SEMICOLON,aux.getLine());
+
+				}else {
+					salir=false;
+				}	
+			}
+
+		}while(salir && aux!=null);	
+
+
+	}
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//WRITE
+	private void WRITE() {
+		
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//ASIGNACION
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//IF
+	/**
+	 * Inicia el reconocimiento de un SI.Observe que si la estructura
+	 * Si no tiene un Sino
+	 */
+	private void IF() {
+		Token aux; 
+		
+
+		aux=lexico.getToken();
+		if(!se_espera(aux,TokenSubType.IF))
+			error(TokenSubType.IF);
+		aux=lexico.getToken();
+		if(!se_espera(aux,TokenSubType.LEFT_PARENTHESIS))
+			error(TokenSubType.LEFT_PARENTHESIS);
+			
+		EXPRESION();
+		aux=lexico.getToken();
+		if(!se_espera(aux,TokenSubType.RIGHT_PARENTHESIS))
+			error(TokenSubType.RIGHT_PARENTHESIS);
+		
+		aux=lexico.getToken();
+		if(!se_espera(aux,TokenSubType.THEN)) {
+			error(TokenSubType.THEN,aux.getLine());
+
+		}
+		aux=lexico.getToken();
+		while(!se_espera(aux,TokenSubType.ELSE)&&
+				!se_espera(aux,TokenSubType.ENDIF)&& aux!=null) {
+			lexico.setBackToken(aux);
+			aux=OPERACIONES();
+
+		}
+		if(aux==null)
+			error(TokenSubType.ENDIF);
+		else {
+
+			if(aux.getSubType()==TokenSubType.ELSE) {
+
+				aux=lexico.getToken();
+				while(!se_espera(aux,TokenSubType.ENDIF)&& aux!=null) {
+
+					lexico.setBackToken(aux);
+					aux=OPERACIONES();
+				}
+				if(aux==null)
+					error(TokenSubType.ENDIF);
+			}
+		}		
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//SWICH
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//WHILE
+	private void WHILE() {
+		Token aux;
+		aux=lexico.getToken();
+		if(!se_espera(aux, TokenSubType.WHILE))
+			error (TokenSubType.WHILE,aux.getLine());
+		aux=lexico.getToken();
+		EXPRESION();
+		if(!se_espera(aux, TokenSubType.DO))
+			error (TokenSubType.DO,aux.getLine());
+		while(!se_espera(aux,TokenSubType.ENDWHILE)&& aux!=null) {
+			lexico.setBackToken(aux);
+			aux=OPERACIONES();
+		}
+		if(aux==null) 
+			error(TokenSubType.ENDWHILE);
+
+		
+	}
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//DOWHILE
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//FOR
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//DECLARACION
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//FUNCIONES
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//EXPRESIONES
 	private void EXPRESION() {
 		Y();
 		OP();
@@ -138,23 +290,17 @@ public class Parser {
 	private void YP() {
 		Token aux;
 		aux=lexico.getToken();
-		if(aux!=null)
-			//if(aux.getLexema().equals("&&")) {
-			if(aux.getLexeme() == "&&") {
-				C();
-				YP();
-			}else {
-				lexico.setBackToken(aux);
-			}
-
+		if (se_espera(aux,TokenSubType.AND2)) {
+			C();
+			YP();
+		}
+		else lexico.setBackToken(aux);
 	}
 	
 	private void OP() {
 		Token aux;
 		aux=lexico.getToken();
-		if(aux != null)
-			//if(aux.getLexema().equals("||")) {
-			if(aux.getLexeme() == "||") {
+		if (se_espera(aux,TokenSubType.OR)) {
 				Y();
 				OP();
 			}else {
@@ -243,151 +389,10 @@ public class Parser {
 
 
 	private void F() {
-//		Token aux;
-//		aux=lexico.getToken();
-//		if(!(se_espera(aux,TokenType.IDENTIFIER)|| 
-//				se_espera(aux,TokenSubType.INTEGERNUMBER) || 
-//				se_espera(aux,TokenSubType.REALNUMBER) )) {
-//
-//			if(!(se_espera(aux,TokenSubType.LEFT_PARENTHESIS))){
-//
-//				errores.error("Error en linea "+aux.getLinea()+" se espera numero o identificador");				
-//			}else {
-//				EXPRESION();
-//				aux=lexico.getToken();
-//				if(!(se_espera(aux,TokenSubType.RIGHT_PARENTHESIS))){
-//					errores.error("Error en linea "+aux.getLinea()+" se espera )");				
-//
-//				}
-//
-//			}
-//
-//		}		
+	
 
 	}
-
-	/**
-	 * Inicia el reconocimiento de un SI.Observe que si la estructura
-	 * Si no tiene un Sino
-	 */
-	private void IF() {
-		Token aux; 
-		
-
-		aux=lexico.getToken();
-		if(!se_espera(aux,TokenSubType.IF))
-			error(TokenSubType.IF);
-		aux=lexico.getToken();
-		if(!se_espera(aux,TokenSubType.LEFT_PARENTHESIS))
-			error(TokenSubType.LEFT_PARENTHESIS);
-			
-		EXPRESION();
-		aux=lexico.getToken();
-		if(!se_espera(aux,TokenSubType.RIGHT_PARENTHESIS))
-			error(TokenSubType.RIGHT_PARENTHESIS);
-		
-		aux=lexico.getToken();
-		if(!se_espera(aux,TokenSubType.THEN)) {
-			error(TokenSubType.THEN,aux.getLine());
-
-		}
-		aux=lexico.getToken();
-		while(!se_espera(aux,TokenSubType.ELSE)&&
-				!se_espera(aux,TokenSubType.ENDIF)&& aux!=null) {
-			lexico.setBackToken(aux);
-			aux=OPERACIONES();
-
-		}
-		if(aux==null)
-			error(TokenSubType.ENDIF);
-		else {
-
-			if(aux.getSubType()==TokenSubType.ELSE) {
-
-				aux=lexico.getToken();
-				while(!se_espera(aux,TokenSubType.ENDIF)&& aux!=null) {
-
-					lexico.setBackToken(aux);
-					aux=OPERACIONES();
-				}
-				if(aux==null)
-					error(TokenSubType.ENDIF);
-			}
-		}		
-	}
-
-	Token OPERACIONES() {
-		Token aux;
-		boolean f;
-		f=OPERACION();
-		if(!f) {
-			aux=lexico.getToken();
-			error("Error en linea "+aux.getLine()+" se recibio: "+aux.getLexeme());
-			aux=lexico.getToken();
-		}else
-			aux=lexico.getToken();
-		return aux;
-	}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////
-	private void WHILE() {
-		
-	}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////
-	private void WRITE() {
-		
-	}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////
-	private void READ() {
-		Token aux;
-		String id;
-		boolean salir=true;
-		aux=lexico.getToken();
-
-		if(!se_espera(aux,TokenSubType.READ))
-			error(TokenSubType.READ,aux.getLine());
-
-		do {
-			aux=lexico.getToken();
-			if(!se_espera(aux,TokenType.IDENTIFIER)){
-				error(TokenType.IDENTIFIER,aux.getLine()); 
-			}
-			aux=lexico.getToken();
-			salir=se_espera(aux,TokenSubType.COMMA);
-			if(!salir) {
-				if(!se_espera(aux,TokenSubType.SEMICOLON)){
-					error(TokenSubType.SEMICOLON,aux.getLine());
-
-				}else {
-					salir=false;
-				}	
-			}
-
-		}while(salir && aux!=null);	
-
-
-	}
-
-	void PROCESS() {
-		Token aux;
-		aux=lexico.getToken();
-		if(!se_espera(aux,TokenSubType.PROCESS))
-			error(TokenSubType.PROCESS,aux.getLine());
-		aux=lexico.getToken();
-		if(!se_espera(aux,TokenType.IDENTIFIER))
-			error(TokenType.IDENTIFIER,aux.getLine());	
-		aux=lexico.getToken();
-		while(!se_espera(aux,TokenSubType.ENDPROCESS)&& aux!=null) {
-			lexico.setBackToken(aux);
-			aux=OPERACIONES();
-		}
-		if(aux==null) 
-			error(TokenSubType.ENDPROCESS);
-
-	}
-
+	
 	public static void main(String[] args) {
 		new Parser("ejemplo.txt");
 

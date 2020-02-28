@@ -14,6 +14,7 @@ public enum TokenSubType {
 	AND("[&|\\|]"),
 	//error tenia ! 
 	OR("||"),
+	AND2("&&"),
 	NEGATION("!"),
 	LEFT_PARENTHESIS("("),
 	RIGHT_PARENTHESIS(")"),
