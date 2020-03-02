@@ -14,7 +14,7 @@ public enum TokenType{
 	ARITHMETIC_OPERATOR("\\*|/|\\+|-|%"),
 	WHITE_SPACE("[\t|\f|\r|\n]+"),
 	IDENTIFIER("[_[a-zA-Z]][_[a-zA-Z]\\d]*"),
-	RELATIONAL_OPERATOR("<|>!=|<=|>="),
+	RELATIONAL_OPERATOR("<|>!=|<=|>=|>"),
 	COMPARISON_OPERATOR("!=|=="),
 	LOGICAL_OPERATOR("[&&|\\|||!]"),
 	PARENTHESIS("(|)"),

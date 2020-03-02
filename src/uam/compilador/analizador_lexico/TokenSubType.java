@@ -25,7 +25,7 @@ public enum TokenSubType {
 	RETURN("return"),INTEGER("integer"),REAL("real"),BOOLEAN("boolean"),
 	CHARACTER("character"),FALSE("false"),TRUE("true"),THEN("then"),ENDIF("endif"),
 	SWITCH("switch"),DO("do"),WHILE("while"),BREAK("break"),DEFAULT("default"),
-	ENDSWITCH("endswich"),ENDWHILE("endwhile"),FOR("for"),UNTIL("until"),WITH("with"),STEP("step"),ENDFOR("endfor") ;
+	ENDSWITCH("endswich"),ENDWHILE("endwhile"),FOR("for"),UNTIL("until"),WITH("with"),STEP("step"),ENDFOR("endfor"),DECLARATION("declaration"),ASIGNACION("asignacion");
 	private final String pattern;
 	private TokenSubType(String pattern) {
 		this.pattern = pattern;
