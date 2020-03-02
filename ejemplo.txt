@@ -1,6 +1,6 @@
 process ejemplo
-   read n;
-   for(int i)then
+   read n
+   int(i<=5)then:
       read n;
    else
      read n;
