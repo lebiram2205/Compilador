@@ -1,4 +1,3 @@
 process ejemplo
-while a-b
-endwhile
+real a;
 endprocess

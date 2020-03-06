@@ -142,6 +142,18 @@ public class Parser {
 				case WHILE:
 					WHILE();
 					return  true;
+				case DO:
+					DOWHILE();
+					return true;
+				case INTEGER:
+					DECLARATION();
+					return true;
+				case REAL:
+					DECLARATION();
+					return true;
+				case BOOLEAN:
+					DECLARATION();
+					return true;
 				default:break;	
 
 
@@ -183,6 +195,7 @@ public class Parser {
 		aux=lexico.getToken();
 		
 		if(se_espera(aux,TokenSubType.INTEGER)) {
+			aux=lexico.getToken();
 			if(se_espera(aux,TokenType.IDENTIFIER)) {
 				aux=lexico.getToken();
 				while(!se_espera(aux,TokenSubType.SEMICOLON)&& aux!=null) {
@@ -205,6 +218,7 @@ public class Parser {
 		}
 		///////////////////////////////////////////////////////////////
 		if(se_espera(aux,TokenSubType.REAL)) {
+			aux=lexico.getToken();
 			if(se_espera(aux,TokenType.IDENTIFIER)) {
 				aux=lexico.getToken();
 				while(!se_espera(aux,TokenSubType.SEMICOLON)&& aux!=null) {
@@ -227,6 +241,7 @@ public class Parser {
 		}
 		//////////////////////////////////////////////////////////////////
 		if(se_espera(aux,TokenSubType.BOOLEAN)) {
+			aux=lexico.getToken();
 			if(se_espera(aux,TokenType.IDENTIFIER)) {
 				aux=lexico.getToken();
 				while(!se_espera(aux,TokenSubType.SEMICOLON)&& aux!=null) {
@@ -249,6 +264,7 @@ public class Parser {
 		}
 		////////////////////////////////////////////////////////////////
 		if(se_espera(aux,TokenSubType.CHARACTER)) {
+			aux=lexico.getToken();
 			if(se_espera(aux,TokenType.IDENTIFIER)) {
 				aux=lexico.getToken();
 				while(!se_espera(aux,TokenSubType.SEMICOLON)&& aux!=null) {
@@ -480,13 +496,23 @@ public class Parser {
 		aux=lexico.getToken();
 		if(!se_espera(aux,TokenSubType.DO))
 			error(TokenSubType.DO);
+		aux=lexico.getToken();
 		while(!se_espera(aux,TokenSubType.WHILE) && aux!=null) {
 			lexico.setBackToken(aux);
 			aux=OPERACIONES();
 		}if(aux==null) {
 			error(TokenSubType.WHILE);
 		}
+		aux=lexico.getToken();
+		if(!se_espera(aux,TokenSubType.LEFT_PARENTHESIS))
+			error(TokenSubType.LEFT_PARENTHESIS);
 		EXPRESION();
+		aux=lexico.getToken();
+		if(!se_espera(aux,TokenSubType.RIGHT_PARENTHESIS))
+			error(TokenSubType.RIGHT_PARENTHESIS);
+		aux=lexico.getToken();
+		if(!se_espera(aux,TokenSubType.SEMICOLON))
+			error(TokenSubType.SEMICOLON);
 	}
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// FOR
