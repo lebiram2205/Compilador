@@ -154,6 +154,9 @@ public class Parser {
 				case BOOLEAN:
 					DECLARATION();
 					return true;
+				case FOR:
+					FOR();
+					return true;
 	
 				default:break;	
 
@@ -163,7 +166,8 @@ public class Parser {
 				switch(aux.getType()) {
 
 				case IDENTIFIER:
-					break;
+					ASIGNACION();
+					return true;
 
 				}
 				
@@ -254,7 +258,7 @@ public class Parser {
 							error(TokenType.IDENTIFIER,aux.getLine());
 					}else if(se_espera(aux,TokenType.ASSIGNMENT)) {
 						aux=lexico.getToken();
-						if(!se_espera(aux,TokenSubType.TRUE)||!se_espera(aux,TokenSubType.FALSE))
+						if(!(se_espera(aux,TokenSubType.TRUE)||se_espera(aux,TokenSubType.FALSE)))
 							error(TokenSubType.BOOLEAN,aux.getLine());
 					}
 					aux=lexico.getToken();
@@ -522,7 +526,40 @@ public class Parser {
 		aux=lexico.getToken();
 		if(!se_espera(aux,TokenSubType.FOR))
 			error(TokenSubType.FOR);
-		EXPRESION();
+		aux=lexico.getToken();
+		if(!se_espera(aux,TokenType.IDENTIFIER))
+			error(TokenType.IDENTIFIER,aux.getLine());
+		aux=lexico.getToken();
+		if(!se_espera(aux,TokenType.ASSIGNMENT))
+			error(TokenType.ASSIGNMENT,aux.getLine());
+		aux=lexico.getToken();
+		if(!(se_espera(aux,TokenSubType.INTEGERNUMBER)||se_espera(aux,TokenType.IDENTIFIER)))/////////////////
+			error("ERROR EN EL VALOR INGRESADO");
+		aux=lexico.getToken();
+		if(!se_espera(aux,TokenSubType.UNTIL))
+			error(TokenSubType.UNTIL);
+		aux=lexico.getToken();
+		if(!(se_espera(aux,TokenSubType.INTEGERNUMBER)||se_espera(aux,TokenType.IDENTIFIER)))////////////////////
+			error("ERROR EN EL VALOR INGRESADO");
+		aux=lexico.getToken();
+		if(!se_espera(aux,TokenSubType.LEFT_PARENTHESIS))
+			error(TokenSubType.LEFT_PARENTHESIS);
+		aux=lexico.getToken();
+		if(!se_espera(aux,TokenSubType.WITH))
+			error(TokenSubType.WITH);
+		aux=lexico.getToken();
+		if(!se_espera(aux,TokenSubType.STEP))
+			error(TokenSubType.STEP);
+		aux=lexico.getToken();
+		if(!(se_espera(aux,TokenSubType.INTEGERNUMBER)||se_espera(aux,TokenType.IDENTIFIER)))/////////////////////////
+			error("ERROR EN EL VALOR INGRESADO");
+		aux=lexico.getToken();
+		if(!se_espera(aux,TokenSubType.RIGHT_PARENTHESIS))
+			error(TokenSubType.RIGHT_PARENTHESIS);
+		aux=lexico.getToken();
+		if(!se_espera(aux,TokenSubType.DO))
+			error(TokenSubType.DO);
+		aux=lexico.getToken();
 		while(!se_espera(aux,TokenSubType.ENDFOR) && aux!=null) {
 			lexico.setBackToken(aux);
 			aux=OPERACIONES();

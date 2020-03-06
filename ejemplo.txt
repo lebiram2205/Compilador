@@ -1,3 +1,6 @@
 process ejemplo
-a=a;
+for a = 5 until a ( with step 1 ) do
+if(a==b+a) then
+endif
+endfor
 endprocess
