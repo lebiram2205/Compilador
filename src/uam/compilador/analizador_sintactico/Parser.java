@@ -154,6 +154,7 @@ public class Parser {
 				case BOOLEAN:
 					DECLARATION();
 					return true;
+	
 				default:break;	
 
 

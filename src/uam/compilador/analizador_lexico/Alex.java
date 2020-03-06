@@ -310,12 +310,12 @@ public class Alex implements LexicoAnalyzer {
 				index++;
 				caracter = input.charAt(index);
 				if (caracter == '/') {
-
+					//poner un while caracter no sea whitespace
 					lexeme = lexeme + caracter;
 					index++;
 					aux = new Token(TokenType.COMMENT, lexeme);
 					aux.setLine(linea);
-					tlist.add(aux);// Poner que el lexema incremente hasta hallar \n
+					//tlist.add(aux);// Poner que el lexema incremente hasta hallar \n
 				} else if (caracter == '*') {
 					index++;
 					while (index < input.length()) {
@@ -327,7 +327,7 @@ public class Alex implements LexicoAnalyzer {
 							if (caracter == '/') {
 								aux = new Token(TokenType.COMMENT, lexeme);
 								aux.setLine(linea);
-								tlist.add(aux);
+								//tlist.add(aux);
 								break;
 							}
 
