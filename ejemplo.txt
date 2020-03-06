@@ -1,6 +1,6 @@
-process ejemplo
-for a = 5 until a ( with step 1 ) do
-if(a==b+a) then
-endif
-endfor
-endprocess
+
+
+real function a (a)
+read a;
+return c;
+endfunction

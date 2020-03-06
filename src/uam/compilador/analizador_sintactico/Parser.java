@@ -16,7 +16,8 @@ public class Parser {
 
 		lexico = new Alex(source);
 		System.out.println("\nINICIA EL RECONOCIMIENTO");
-		PROCESS();
+		//PROCESS();
+		FUNCTION();
 		System.out.println("\nTERMINA EL RECONOCIMIENTO");
 
 	}
@@ -430,7 +431,7 @@ public class Parser {
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// FUNCION
-	private void FUNCTION() {
+ void FUNCTION() {
 		Token aux;
 		//aux=lexico.getToken();
 		//if(!se_espera(aux,TokenSubType.INTEGER))
@@ -449,20 +450,33 @@ public class Parser {
 		aux=lexico.getToken();
 		if(!se_espera(aux,TokenSubType.RIGHT_PARENTHESIS))
 			error(TokenSubType.RIGHT_PARENTHESIS);
-		aux=OPERACIONES();
-		aux=lexico.getToken();
-		if(!se_espera(aux,TokenSubType.RETURN))
+		
+		aux = lexico.getToken();
+		while (!se_espera(aux, TokenSubType.RETURN) && aux != null) {
+
+			lexico.setBackToken(aux);
+			aux = OPERACIONES();
+		}
+		if (aux == null)
 			error(TokenSubType.RETURN);
+
+		
+		//aux=lexico.getToken();
+		//if(!se_espera(aux,TokenSubType.RETURN))
+			//error(TokenSubType.RETURN);
 		EXPRESION();
 		aux=lexico.getToken();
-		if(!se_espera(aux,TokenSubType.SEMICOLON));
+		if(!se_espera(aux,TokenSubType.SEMICOLON))
 			error(TokenSubType.SEMICOLON);
+		aux=lexico.getToken();
+		if(!se_espera(aux,TokenSubType.ENDFUNCTION))
+			error(TokenSubType.ENDFUNCTION);
 	}
 	
 	private void TYPE() {
 		Token aux;
 		aux=lexico.getToken();
-		if(!se_espera(aux,TokenSubType.INTEGER)||!se_espera(aux,TokenSubType.REAL)||!se_espera(aux,TokenSubType.INTEGER)||!se_espera(aux,TokenSubType.BOOLEAN)||!se_espera(aux,TokenSubType.CHARACTER))
+		if(!(se_espera(aux,TokenSubType.INTEGER)||se_espera(aux,TokenSubType.REAL)||se_espera(aux,TokenSubType.BOOLEAN)||se_espera(aux,TokenSubType.CHARACTER)))
 			error(TokenType.KEY_WORD,aux.getLine());
 	}
 	
@@ -473,6 +487,7 @@ public class Parser {
 			aux=lexico.getToken();
 			if(se_espera(aux,TokenSubType.COMMA))
 				LISTAP();
+			lexico.setBackToken(aux);
 		}
 	}
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
