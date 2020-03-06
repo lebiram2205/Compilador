@@ -1,8 +1,4 @@
 process ejemplo
-   read n
-   int(i<=5)then:
-      read n;
-   else
-     read n;
-   endif
+while a-b
+endwhile
 endprocess
