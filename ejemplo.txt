@@ -1,8 +1,13 @@
-process ejemplo
-   read n
-   int(i<=5)then:
-      read n;
-   else
-     read n;
-   endif
+process id
+
 endprocess
+
+real function a (a)
+read a;
+return c;
+endfunction
+
+real function b (a)
+read a;
+return c;
+endfunction
