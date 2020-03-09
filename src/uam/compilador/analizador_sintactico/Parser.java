@@ -1,15 +1,18 @@
 package uam.compilador.analizador_sintactico;
 
 import java.util.LinkedList;
+import java.util.TreeMap;
 
 import uam.compilador.analizador_lexico.Alex;
 import uam.compilador.analizador_lexico.Token;
 import uam.compilador.analizador_lexico.TokenSubType;
 import uam.compilador.analizador_lexico.TokenType;
+import uam.compilador.generador_codigo.Generador;
 
 public class Parser {
 	private Alex lexico;
-
+	private TreeMap<String, Simbolo> tablaSimbolos = new TreeMap<String, Simbolo>();
+	private Generador generador = new Generador(); 
 	private LinkedList<String> e = new LinkedList<String>();
 
 	Parser(String source) {
@@ -20,7 +23,9 @@ public class Parser {
 		//FUNCTION();
 		PROGRAM();
 		System.out.println("\nTERMINA EL RECONOCIMIENTO");
-
+		for(Simbolo s:tablaSimbolos.values()) {
+			System.out.println(s);
+		}
 	}
 
 	/**
@@ -118,7 +123,7 @@ public class Parser {
 		aux = lexico.getToken();
 		while (!se_espera(aux, TokenSubType.ENDPROCESS) && aux != null) {
 			lexico.setBackToken(aux);
-			aux = OPERACIONES();
+			aux = OPERACIONES("\t");
 		}
 		if (aux == null)
 			error(TokenSubType.ENDPROCESS);
@@ -132,7 +137,7 @@ public class Parser {
 	 * el el Token leido (if, read, etc.) se devuelve a la lista de Tokens a fin que
 	 * la estructura a reconocer no tenga problemas.
 	 */
-	private boolean OPERACION() {
+	private boolean OPERACION(String t) {
 		Token aux;
 		aux=lexico.getToken();
 		//System.out.println("MIToken:"+aux);
@@ -146,7 +151,7 @@ public class Parser {
 				case IF:
 					//Se reconoce un if. Al devolver el Token el metodo IF puede
 					//indicar que espera de inicio un TokenSubType IF.
-					IF();
+					IF(t);
 					return true;	
 				case READ:
 					READ();
@@ -195,10 +200,10 @@ public class Parser {
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	Token OPERACIONES() {
+	Token OPERACIONES(String t) {
 		Token aux;
 		boolean f;
-		f = OPERACION();
+		f = OPERACION(t);
 		if (!f) {
 			aux = lexico.getToken();
 			error("Error en linea " + aux.getLine() + " se recibio: " + aux.getLexeme());
@@ -399,48 +404,72 @@ public class Parser {
 	 * Inicia el reconocimiento de un SI.Observe que si la estructura Si no tiene un
 	 * Sino
 	 */
-	private void IF() {
-		Token aux;
-		
-		aux = lexico.getToken();
-		if (!se_espera(aux, TokenSubType.IF))
+	private void IF(String t) {
+		Token aux; 
+		int etiqueta1,etiqueta2,etiqueta3;
+		String expresion="";
+		aux=lexico.getToken();
+		if(!se_espera(aux,TokenSubType.IF))
 			error(TokenSubType.IF);
-		aux = lexico.getToken();
-		if (!se_espera(aux, TokenSubType.LEFT_PARENTHESIS))
+
+		aux=lexico.getToken();
+		
+		if(!se_espera(aux,TokenSubType.LEFT_PARENTHESIS))
 			error(TokenSubType.LEFT_PARENTHESIS);
 
 		EXPRESION();
-		aux = lexico.getToken();
-		if (!se_espera(aux, TokenSubType.RIGHT_PARENTHESIS))
+		while(!e.isEmpty())
+			expresion=expresion+e.pop();
+
+		etiqueta1=generador.getNumeroEtiqueta();
+		generador.incrementaNumeroEtiqueta();
+		etiqueta2=generador.getNumeroEtiqueta();
+		generador.incrementaNumeroEtiqueta();
+		etiqueta3=generador.getNumeroEtiqueta();
+		generador.incrementaNumeroEtiqueta();
+		generador.emitir(t+"cmp "+expresion+" true");
+		generador.emitir(t+"jmpc ETIQUETA"+etiqueta1);
+		generador.emitir(t+"jump ETIQUETA"+etiqueta2);
+		
+		aux=lexico.getToken();
+		
+		if(!se_espera(aux,TokenSubType.RIGHT_PARENTHESIS))
 			error(TokenSubType.RIGHT_PARENTHESIS);
 
-		aux = lexico.getToken();
-		if (!se_espera(aux, TokenSubType.THEN)) {
-			error(TokenSubType.THEN, aux.getLine());
+		aux=lexico.getToken();
+		if(!se_espera(aux,TokenSubType.THEN)) {
+			error(TokenSubType.THEN,aux.getLine());
 
 		}
-		aux = lexico.getToken();
-		while (!se_espera(aux, TokenSubType.ELSE) && !se_espera(aux, TokenSubType.ENDIF) && aux != null) {
+		generador.emitir(t+"ETIQUETA"+etiqueta1+":");
+		aux=lexico.getToken();
+		while(!se_espera(aux,TokenSubType.ELSE)&&
+				!se_espera(aux,TokenSubType.ENDIF)&& aux!=null) {
 			lexico.setBackToken(aux);
-			aux = OPERACIONES();
+			aux=OPERACIONES(t+"\t");
 
 		}
-		if (aux == null)
+		if(aux==null)
 			error(TokenSubType.ENDIF);
 		else {
 
-			if (aux.getSubType() == TokenSubType.ELSE) {
+			if(aux.getSubType()==TokenSubType.ELSE) {
 
-				aux = lexico.getToken();
-				while (!se_espera(aux, TokenSubType.ENDIF) && aux != null) {
+				generador.emitir(t+"jump ETIQUETA"+etiqueta3);
+				generador.emitir(t+"ETIQUETA"+etiqueta2+":");
+				aux=lexico.getToken();
+				while(!se_espera(aux,TokenSubType.ENDIF)&& aux!=null) {
 
 					lexico.setBackToken(aux);
-					aux = OPERACIONES();
+					aux=OPERACIONES(t+"\t");
 				}
-				if (aux == null)
+				if(aux==null)
 					error(TokenSubType.ENDIF);
-			}
-		}
+				else
+					generador.emitir(t+"ETIQUETA"+etiqueta3+":");
+			}else
+				generador.emitir(t+"ETIQUETA"+etiqueta2+":");
+		}		
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -479,7 +508,7 @@ public class Parser {
 		while (!se_espera(aux, TokenSubType.RETURN) && aux != null) {
 
 			lexico.setBackToken(aux);
-			aux = OPERACIONES();
+			aux = OPERACIONES("\t");
 		}
 		if (aux == null)
 			error(TokenSubType.RETURN);
@@ -526,7 +555,7 @@ public class Parser {
 		aux = lexico.getToken();
 		while (!se_espera(aux, TokenSubType.ENDWHILE) && aux != null) {
 			lexico.setBackToken(aux);
-			aux = OPERACIONES();
+			aux = OPERACIONES("\t");
 		}
 		if (aux == null)
 			error(TokenSubType.ENDWHILE);
@@ -543,7 +572,7 @@ public class Parser {
 		aux=lexico.getToken();
 		while(!se_espera(aux,TokenSubType.WHILE) && aux!=null) {
 			lexico.setBackToken(aux);
-			aux=OPERACIONES();
+			aux=OPERACIONES("\t");
 		}if(aux==null) {
 			error(TokenSubType.WHILE);
 		}
@@ -601,7 +630,7 @@ public class Parser {
 		aux=lexico.getToken();
 		while(!se_espera(aux,TokenSubType.ENDFOR) && aux!=null) {
 			lexico.setBackToken(aux);
-			aux=OPERACIONES();
+			aux=OPERACIONES("\t");
 		}if(aux==null) {
 			error(TokenSubType.ENDFOR);
 		}
@@ -768,7 +797,10 @@ private void YP() {
 		//System.out.println("\t   Operador Expresion:"+aux.getData());
 	}
 	public static void main(String[] args) {
-		new Parser("ejemplo.txt");
+		//new Parser("ejemplo.txt");
+		//new Parser("programa1.txt");
+		new Parser("ejemploprofe.txt");
+		
 
 	}
 
