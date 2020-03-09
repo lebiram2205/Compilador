@@ -17,7 +17,8 @@ public class Parser {
 		lexico = new Alex(source);
 		System.out.println("\nINICIA EL RECONOCIMIENTO");
 		//PROCESS();
-		FUNCTION();
+		//FUNCTION();
+		PROGRAM();
 		System.out.println("\nTERMINA EL RECONOCIMIENTO");
 
 	}
@@ -91,7 +92,20 @@ public class Parser {
 		}
 		return false;
 	}
-
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	void PROGRAM() {
+		Token aux;
+		aux=lexico.getToken();
+		if(!se_espera(aux,TokenSubType.PROCESS))
+			error("El sistema debe iniciarse con un PROCESS");
+		lexico.setBackToken(aux);
+		PROCESS();
+		aux=lexico.getToken();
+		if(aux!=null) {
+			lexico.setBackToken(aux);
+			LISTA_FUNCIONES();
+		}
+	}
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	void PROCESS() {
 		Token aux;
@@ -430,8 +444,18 @@ public class Parser {
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	void LISTA_FUNCIONES() {
+		Token aux;
+		aux=lexico.getToken();
+		while(se_espera(aux,TokenSubType.FUNCTION)) {
+			lexico.setBackToken(aux);
+			FUNCTION();
+			aux=lexico.getToken();
+		}lexico.setBackToken(aux);
+		
+	}
 	// FUNCION
- void FUNCTION() {
+	void FUNCTION() {
 		Token aux;
 		//aux=lexico.getToken();
 		//if(!se_espera(aux,TokenSubType.INTEGER))

@@ -1,6 +1,13 @@
+process id
 
+endprocess
 
 real function a (a)
+read a;
+return c;
+endfunction
+
+real function b (a)
 read a;
 return c;
 endfunction
