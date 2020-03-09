@@ -1,0 +1,10 @@
+
+
+
+process miPrograma
+   integer a,b=5,c;
+   if (a+b*3) then
+       
+   endif
+endprocess
+   
