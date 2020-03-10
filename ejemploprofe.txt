@@ -1,15 +1,4 @@
 
 process miPrograma
-   integer a,b=5,c;
-   if (a+b*3) then
-        if (a+b) then
-     
-        else
-        endif
-   else
-        if (a-b) then
-     
-        else
-        endif
-   endif
+  integer x,y=9;
 endprocess

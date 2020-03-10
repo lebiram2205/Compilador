@@ -217,28 +217,65 @@ public class Parser {
 	// DECLARACIONES
 	private void DECLARATION() {
 		Token aux;
+		Simbolo s=null;
+		TokenSubType tr;
+		Token tipo;
+		Token nombre;
+		
 		aux=lexico.getToken();
 		
 		if(se_espera(aux,TokenSubType.INTEGER)) {
 			aux=lexico.getToken();
 			if(se_espera(aux,TokenType.IDENTIFIER)) {
+				//
+				nombre=aux;
+				//
 				aux=lexico.getToken();
 				while(!se_espera(aux,TokenSubType.SEMICOLON)&& aux!=null) {
 					lexico.setBackToken(aux);
 					aux=lexico.getToken();
+					
 					if(se_espera(aux,TokenSubType.COMMA)) {
+						//********
+						 //SE CREA UN Simbolo CON EL LEXEMA Y EL TIPO (INTEGER)
+						s=new Simbolo(nombre.getLexeme(),TokenSubType.INTEGERNUMBER);
+						if(!tablaSimbolos.containsKey(s.getNombre()))
+							tablaSimbolos.put(s.getNombre(), s);
+						else//SI LA VARIABLE YA ESTA DECLARADA, HAY UN ERROR
+							error("Error: La variable "+s.getNombre()+" ya fue declarada");
+						 //********
 						aux=lexico.getToken();
 						if(!se_espera(aux,TokenType.IDENTIFIER))
 							error(TokenType.IDENTIFIER,aux.getLine());
+						//******
+						nombre=aux;
+						//******
 					}else if(se_espera(aux,TokenType.ASSIGNMENT)) {
 						aux=lexico.getToken();
 						if(!se_espera(aux,TokenSubType.INTEGERNUMBER))
 							error(TokenSubType.INTEGERNUMBER,aux.getLine());
+						//***************************
+						s=new Simbolo(nombre.getLexeme(), Integer.parseInt(aux.getLexeme()),TokenSubType.INTEGERNUMBER);
+
+						if(!tablaSimbolos.containsKey(s.getNombre())) 
+							tablaSimbolos.put(s.getNombre(), s);
+						else 
+							error("Error: La variable "+s.getNombre()+" ya fue declarada");
+						
+						//***************************************
 					}
 					aux=lexico.getToken();
 				}
 				if(aux==null) 
 					error(TokenSubType.SEMICOLON);
+				//
+				s=new Simbolo(nombre.getLexeme(),TokenSubType.INTEGERNUMBER);
+				if(!tablaSimbolos.containsKey(s.getNombre()))
+					tablaSimbolos.put(s.getNombre(), s);
+				//else
+					//error("Error: La variable "+s.getNombre()+" ya fue declarada");
+
+				//
 			}else {error(TokenType.IDENTIFIER,aux.getLine());}
 		}
 		///////////////////////////////////////////////////////////////
