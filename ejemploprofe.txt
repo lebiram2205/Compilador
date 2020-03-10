@@ -1,4 +1,4 @@
 
 process miPrograma
-  integer x,y=9;
+ 	real a=5.0;
 endprocess
