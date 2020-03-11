@@ -61,7 +61,7 @@ public class Alex implements LexicoAnalyzer {
 	@Override
 	// crea la lista de token
 	public void createTokenList() {
-
+		
 		char caracter;
 		boolean valor;
 		String lexeme = "";
@@ -239,6 +239,8 @@ public class Alex implements LexicoAnalyzer {
 
 				}
 			}
+			//
+			
 			///////////////////////////////////////////////////////////////////////////////////////////////// )
 			else if (caracter == '+' || caracter == '-') {
 				lexeme = "";

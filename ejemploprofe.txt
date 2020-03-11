@@ -1,4 +1,4 @@
 
 process miPrograma
- 	real a=5.0;
+ 	character a = 'a' ;
 endprocess
