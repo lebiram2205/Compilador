@@ -1,10 +1,5 @@
-
-
-
 process miPrograma
-   integer a,b=5,c;
-   if (a+b*3) then
-       
-   endif
+for id1=4 until id2 (with step 8) do
+endfor
 endprocess
    
