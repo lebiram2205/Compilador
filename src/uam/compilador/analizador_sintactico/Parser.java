@@ -1,5 +1,8 @@
 package uam.compilador.analizador_sintactico;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.util.LinkedList;
 import java.util.TreeMap;
 
@@ -11,9 +14,11 @@ import uam.compilador.generador_codigo.Generador;
 
 public class Parser {
 	private Alex lexico;
-	private TreeMap<String, Simbolo> tablaSimbolos = new TreeMap<String, Simbolo>();
+	private static TreeMap<String, Simbolo> tablaSimbolos = new TreeMap<String, Simbolo>();
 	private Generador generador = new Generador(); 
 	private LinkedList<String> e = new LinkedList<String>();
+	static File file_simbolos;
+	static BufferedWriter write;
 
 	Parser(String source) {
 
@@ -22,10 +27,12 @@ public class Parser {
 		//PROCESS();
 		//FUNCTION();
 		PROGRAM();
+		FileSimbolos();
 		System.out.println("\nTERMINA EL RECONOCIMIENTO");
-		for(Simbolo s:tablaSimbolos.values()) {
+		
+		/*for(Simbolo s:tablaSimbolos.values()) {
 			System.out.println(s);
-		}
+		}*/
 	}
 
 	/**
@@ -929,12 +936,54 @@ private void YP() {
 //			e.add(aux.getLexeme()+"");
 		//System.out.println("\t   Operador Expresion:"+aux.getData());
 	}
+	
+	
+	///////////////////////////////////////
+	//////////////////////////////////////
+	
+	private void FileSimbolos(){
+		String aux = "";
+		int errores=0;
+		file_simbolos = new File("src/archivo_simbolos.txt");
+		//if (errores == 0) {
+			//System.out.println("\nSe creo el archivo simbolos.txt");
+
+			try {
+
+				// Escribimos en el archivo con el metodo write
+				write = new BufferedWriter(new FileWriter(file_simbolos));
+				write.write("Tabla de simbolos: \n");
+				for (Simbolo s : tablaSimbolos.values()) {
+					aux = s.toString();
+					write.write("\n" + aux);
+				}
+				write.close();
+			} catch (Exception e) {
+				System.out.println("\nError al crear el archivo archivo_simbolos.txt");
+			}
+
+		//} else {
+			//System.out.println("\nNo se pudo crear el archivo arvhivo_simbolos.txt, existen errores en el codigo");
+			//if(archivo_simbolos.exists()){
+				//archivo_simbolos.delete();
+
+			//}
+
+		//}
+	}
+	
+	
+	/////////////////////////////////////
+	////////////////////////////////////////
+	
 	public static void main(String[] args) {
 		//new Parser("ejemplo.txt");
 		//new Parser("programa1.txt");
 		new Parser("ejemploprofe.txt");
 		
+		
 
 	}
+	
 
 }
