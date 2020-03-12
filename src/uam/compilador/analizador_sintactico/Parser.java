@@ -116,9 +116,13 @@ public class Parser {
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	void PROCESS() {
 		Token aux;
+		String lex="";
 		aux = lexico.getToken();
 		if (!se_espera(aux, TokenSubType.PROCESS))
 			error(TokenSubType.PROCESS, aux.getLine());
+		lex=aux.getLexeme();
+		generador.emitir("begin"+" "+ lex );
+		lex="";
 		aux = lexico.getToken();
 		if (!se_espera(aux, TokenType.IDENTIFIER))
 			error(TokenType.IDENTIFIER, aux.getLine());
@@ -127,8 +131,11 @@ public class Parser {
 			lexico.setBackToken(aux);
 			aux = OPERACIONES("\t");
 		}
+		
 		if (aux == null)
 			error(TokenSubType.ENDPROCESS);
+		lex=aux.getLexeme();
+		generador.emitir("end"+ " "+lex );
 
 	}
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -403,15 +410,22 @@ public class Parser {
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// ASIGNACION
 	private void ASIGNACION() {
+		String expresion="";
+		String id="";
 		Token aux;
 		aux = lexico.getToken();
 		if (!se_espera(aux, TokenType.IDENTIFIER))
 			error(TokenType.IDENTIFIER, aux.getLine());
+		id= aux.getLexeme();
+			
 		aux = lexico.getToken();
 		if (!se_espera(aux, TokenType.ASSIGNMENT))
 			error(TokenType.ASSIGNMENT, aux.getLine());
-		// <-------------------------------------------------------------------------------------
 		EXPRESION();
+		while(!e.isEmpty())
+			expresion=expresion+e.pop();
+		generador.emitir("mov"+" "+ id +" "+ expresion);
+		expresion = "";
 		aux = lexico.getToken();
 		if (!se_espera(aux, TokenSubType.SEMICOLON))
 			error(TokenSubType.SEMICOLON, aux.getLine());
@@ -653,8 +667,10 @@ public class Parser {
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// FOR
 	private void FOR(String t) {
+		int etiqueta1, etiqueta2, etiqueta3, etiqueta4;
 		Token aux;
 		String id1, id2, id3, id4;
+		
 		aux = lexico.getToken();
 		if (!se_espera(aux, TokenSubType.FOR))
 			error(TokenSubType.FOR);
@@ -668,18 +684,28 @@ public class Parser {
 		aux = lexico.getToken();
 		if (!(se_espera(aux, TokenSubType.INTEGERNUMBER) || se_espera(aux, TokenType.IDENTIFIER)))/////////////////
 			error("ERROR EN EL VALOR INGRESADO");
-		else {
+//		else {
 			id2 = aux.getLexeme();
 			generador.emitir(t+"mv"+"  " +id1+"  "+ id2);
-		}
+//		}
 		aux = lexico.getToken();
 		if (!se_espera(aux, TokenSubType.UNTIL))
 			error(TokenSubType.UNTIL);
 		aux = lexico.getToken();
 		if (!(se_espera(aux, TokenSubType.INTEGERNUMBER) || se_espera(aux, TokenType.IDENTIFIER)))////////////////////
 			error("ERROR EN EL VALOR INGRESADO");
+		id3=aux.getLexeme();
+		etiqueta1=generador.getNumeroEtiqueta();
+		generador.incrementaNumeroEtiqueta();
+		etiqueta2=generador.getNumeroEtiqueta();
+		generador.incrementaNumeroEtiqueta();
+		etiqueta3=generador.getNumeroEtiqueta();
+		generador.incrementaNumeroEtiqueta();
+		generador.emitir("ETIQUETA" + etiqueta3 + ":");
+		generador.emitir(t+"cmp"+"  " +id1+"  "+ id3);
+		generador.emitir(t+"jmpc ETIQUETA"+etiqueta1);
+		generador.emitir(t+"jump ETIQUETA"+etiqueta2);
 		
-		//generador.emitir("ETIQUETA" + etiqueta1 + ":");
 		
 		aux = lexico.getToken();
 		if (!se_espera(aux, TokenSubType.LEFT_PARENTHESIS))
@@ -693,20 +719,27 @@ public class Parser {
 		aux = lexico.getToken();
 		if (!(se_espera(aux, TokenSubType.INTEGERNUMBER) || se_espera(aux, TokenType.IDENTIFIER)))/////////////////////////
 			error("ERROR EN EL VALOR INGRESADO");
+		id4 = aux.getLexeme();
+		etiqueta4=generador.getNumeroEtiqueta();
+		generador.incrementaNumeroEtiqueta();
 		aux = lexico.getToken();
 		if (!se_espera(aux, TokenSubType.RIGHT_PARENTHESIS))
 			error(TokenSubType.RIGHT_PARENTHESIS);
 		aux = lexico.getToken();
 		if (!se_espera(aux, TokenSubType.DO))
 			error(TokenSubType.DO);
+		generador.emitir("ETIQUETA"+ etiqueta1 + ":");
 		aux = lexico.getToken();
 		while (!se_espera(aux, TokenSubType.ENDFOR) && aux != null) {
 			lexico.setBackToken(aux);
 			aux = OPERACIONES("\t");
 		}
+		generador.emitir(t+"add " + id1 +" "+ id4);
+		generador.emitir(t+"jump ETIQUETA"+etiqueta3);
 		if (aux == null) {
 			error(TokenSubType.ENDFOR);
 		}
+		generador.emitir("ETIQUETA"+ etiqueta2 + ":");
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
