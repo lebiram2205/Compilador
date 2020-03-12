@@ -3,6 +3,7 @@ package uam.compilador.analizador_sintactico;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.TreeMap;
 
@@ -19,8 +20,9 @@ public class Parser {
 	private LinkedList<String> e = new LinkedList<String>();
 	static File file_simbolos;
 	static BufferedWriter write;
+	int contadoErrores=0;
 
-	Parser(String source) {
+	Parser(String source) throws IOException {
 
 		lexico = new Alex(source);
 		System.out.println("\nINICIA EL RECONOCIMIENTO");
@@ -45,7 +47,7 @@ public class Parser {
 	 * @return ---
 	 */
 	private void error(TokenSubType st, int linea) {
-
+		contadoErrores++;
 		System.out.println("\t\tError en la linea " + linea + " se espera " + st.name());
 	}
 
@@ -59,11 +61,12 @@ public class Parser {
 	 * @return ---
 	 */
 	private void error(TokenType tt, int linea) {
-
+		contadoErrores++;
 		System.out.println("\t\tError en la linea " + linea + " se espera " + tt.name());
 	}
 
 	private void error(String string) {
+		contadoErrores++;
 		System.out.println("\t\tError " + string);
 
 	}
@@ -76,7 +79,7 @@ public class Parser {
 	 * @return ---
 	 */
 	private void error(TokenSubType ts) {
-
+		contadoErrores++;
 		System.out.println("\t\tError...se espera " + ts.name());
 
 	}
@@ -941,42 +944,33 @@ private void YP() {
 	///////////////////////////////////////
 	//////////////////////////////////////
 	
-	private void FileSimbolos(){
+	private void FileSimbolos() throws IOException{
 		String aux = "";
-		int errores=0;
-		file_simbolos = new File("src/archivo_simbolos.txt");
-		//if (errores == 0) {
-			//System.out.println("\nSe creo el archivo simbolos.txt");
+		//int errores=0;
+		file_simbolos = new File("src/file_simbolos.txt");
+		if (contadoErrores==0) {
+			System.out.println("\nSe creo el archivo txt");
 
-			try {
 
-				// Escribimos en el archivo con el metodo write
-				write = new BufferedWriter(new FileWriter(file_simbolos));
-				write.write("Tabla de simbolos: \n");
-				for (Simbolo s : tablaSimbolos.values()) {
-					aux = s.toString();
-					write.write("\n" + aux);
-				}
-				write.close();
-			} catch (Exception e) {
-				System.out.println("\nError al crear el archivo archivo_simbolos.txt");
+			// Escribimos en el archivo con el metodo write
+			write = new BufferedWriter(new FileWriter(file_simbolos));
+			write.write("Tabla de simbolos: \n");
+			for (Simbolo s : tablaSimbolos.values()) {
+				aux = s.toString();
+				write.write("\n" + aux);
 			}
+			write.close();
 
-		//} else {
-			//System.out.println("\nNo se pudo crear el archivo arvhivo_simbolos.txt, existen errores en el codigo");
-			//if(archivo_simbolos.exists()){
-				//archivo_simbolos.delete();
-
-			//}
-
-		//}
+		} else {
+			System.out.println("\nNo se pudo crear el archivo porque hay ERRORES");
+		}
 	}
 	
 	
 	/////////////////////////////////////
 	////////////////////////////////////////
 	
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 		//new Parser("ejemplo.txt");
 		//new Parser("programa1.txt");
 		new Parser("ejemploprofe.txt");
