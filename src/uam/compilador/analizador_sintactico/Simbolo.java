@@ -9,6 +9,7 @@ public class Simbolo {
 	private double rvalor=0.0;
 	private boolean bvalor=false;
 	private boolean defaultValor=true;
+	private String caracter=" ";
 	private TokenSubType stype;
 	
 
@@ -36,6 +37,12 @@ public class Simbolo {
 		this.nombre = nombre;
 		this.bvalor = bvalor;
 		this.stype = stype;
+	}
+	public Simbolo(String nombre, String caracter, TokenSubType stype) {
+		super();
+		this.nombre=nombre;
+		this.caracter=caracter;
+		this.stype=stype;
 	}
 	public Simbolo(String nombre) {
 		super();
@@ -73,6 +80,13 @@ public class Simbolo {
 		this.defaultValor = defaultValor;
 	}
 	
+	public String getCaracter() {
+		return caracter;
+	}
+	public void setCaracter(String caracter) {
+		this.caracter = caracter;
+	}
+	
 	public TokenSubType getStyte() {
 		return stype;
 	}
@@ -85,8 +99,9 @@ public class Simbolo {
 	}**/
 	public String toString() {
 		if(ivalor==0 && rvalor==0)
-			return "Simbolo [Nombre=" + nombre + ", ivalor=" + ivalor + ", rvalor=" + rvalor + ", boolean=" + bvalor + "]";
+			return "Simbolo [Nombre=" + nombre + ", ivalor=" + ivalor + ", rvalor=" + rvalor + ", boolean=" + bvalor + ", caracter=" + caracter +" ]";
 		return "Simbolo [Nombre=" + nombre + ", ivalor=" + ivalor + ", rvalor=" + rvalor + "]";
 	}
+	
 	
 }

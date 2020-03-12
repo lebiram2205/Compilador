@@ -240,7 +240,25 @@ public class Alex implements LexicoAnalyzer {
 				}
 			}
 			//
-			
+			else if (caracter == '\'') {
+				lexeme = "";
+				//lexeme = lexeme + caracter;
+				index++;
+				
+				caracter = input.charAt(index);
+				lexeme = lexeme+caracter;
+				index++;
+				
+				caracter = input.charAt(index);
+				
+				if(caracter == '\'') {
+					aux = new Token(TokenType.STRING,TokenSubType.CHAR, lexeme);
+					aux.setLine(linea);
+					tlist.add(aux);
+					index++;
+				}
+				
+			}
 			///////////////////////////////////////////////////////////////////////////////////////////////// )
 			else if (caracter == '+' || caracter == '-') {
 				lexeme = "";
