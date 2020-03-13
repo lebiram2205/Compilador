@@ -683,7 +683,7 @@ public class Parser {
 		if (!se_espera(aux, TokenType.IDENTIFIER))
 			error(TokenType.IDENTIFIER, aux.getLine());
 		lex=aux.getLexeme();
-		generador.emitir("begin" + " " + lex);
+		code.add(generador.emitir("begin" + " " + lex));
 		aux = lexico.getToken();
 		if (!se_espera(aux, TokenSubType.LEFT_PARENTHESIS))
 			error(TokenSubType.LEFT_PARENTHESIS);
@@ -708,14 +708,14 @@ public class Parser {
 		//pop es sacar
 		while(!e.isEmpty())
 			expresion=expresion+e.pop();
-		generador.emitir(t+"¡"+expresion+"!");
+		code.add(generador.emitir(t+"¡"+expresion+"!"));
 		aux = lexico.getToken();
 		if (!se_espera(aux, TokenSubType.SEMICOLON))
 			error(TokenSubType.SEMICOLON);
 		aux = lexico.getToken();
 		if (!se_espera(aux, TokenSubType.ENDFUNCTION))
 			error(TokenSubType.ENDFUNCTION);
-		generador.emitir("end" + " " + lex);
+		code.add(generador.emitir("end" + " " + lex));
 	}
 
 	private void TYPE() {
@@ -1126,8 +1126,8 @@ public class Parser {
 ////////////////////////////////////////
 	
 	public static void main(String[] args) throws IOException {
-		//new Parser("ejemplo.txt");
-		new Parser("programa1.txt");
+		new Parser("ejemplo.txt");
+		//new Parser("programa1.txt");
 		//new Parser("ejemploprofe.txt");
 		
 		
