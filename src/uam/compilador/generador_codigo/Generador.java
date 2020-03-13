@@ -4,9 +4,15 @@ public class Generador {
 
 	private int contadorEtiquetas=1;
 	private boolean error=false;
+	/**
 	public void emitir(String instruccion) {
 		if(!error)
 			System.out.println(instruccion);
+	}
+	**/
+	public String emitir(String instruccion) {
+		//if(!error)
+			return instruccion;
 	}
 
 	public int getNumeroEtiqueta(){
