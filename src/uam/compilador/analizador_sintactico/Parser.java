@@ -15,8 +15,10 @@ import uam.compilador.generador_codigo.Generador;
 
 public class Parser {
 	private Alex lexico;
+
 	private static TreeMap<String, Simbolo> tablaSimbolos = new TreeMap<String, Simbolo>();
 	private Generador generador = new Generador(); 
+
 	private LinkedList<String> e = new LinkedList<String>();
 	static File file_simbolos;
 	static BufferedWriter write;
@@ -26,13 +28,15 @@ public class Parser {
 
 		lexico = new Alex(source);
 		System.out.println("\nINICIA EL RECONOCIMIENTO");
-		//PROCESS();
-		//FUNCTION();
+		// PROCESS();
+		// FUNCTION();
 		PROGRAM();
 		FileSimbolos();
 		System.out.println("\nTERMINA EL RECONOCIMIENTO");
+
 		
 		/*for(Simbolo s:tablaSimbolos.values()) {
+
 			System.out.println(s);
 		}*/
 	}
@@ -107,26 +111,32 @@ public class Parser {
 		}
 		return false;
 	}
+
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	void PROGRAM() {
 		Token aux;
-		aux=lexico.getToken();
-		if(!se_espera(aux,TokenSubType.PROCESS))
+		aux = lexico.getToken();
+		if (!se_espera(aux, TokenSubType.PROCESS))
 			error("El sistema debe iniciarse con un PROCESS");
 		lexico.setBackToken(aux);
 		PROCESS();
-		aux=lexico.getToken();
-		if(aux!=null) {
+		aux = lexico.getToken();
+		if (aux != null) {
 			lexico.setBackToken(aux);
 			LISTA_FUNCIONES();
 		}
 	}
+
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	void PROCESS() {
 		Token aux;
+		String lex="";
 		aux = lexico.getToken();
 		if (!se_espera(aux, TokenSubType.PROCESS))
 			error(TokenSubType.PROCESS, aux.getLine());
+		lex=aux.getLexeme();
+		generador.emitir("begin"+" "+ lex );
+		lex="";
 		aux = lexico.getToken();
 		if (!se_espera(aux, TokenType.IDENTIFIER))
 			error(TokenType.IDENTIFIER, aux.getLine());
@@ -135,8 +145,11 @@ public class Parser {
 			lexico.setBackToken(aux);
 			aux = OPERACIONES("\t");
 		}
+		
 		if (aux == null)
 			error(TokenSubType.ENDPROCESS);
+		lex=aux.getLexeme();
+		generador.emitir("end"+ " "+lex );
 
 	}
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -149,31 +162,31 @@ public class Parser {
 	 */
 	private boolean OPERACION(String t) {
 		Token aux;
-		aux=lexico.getToken();
-		//System.out.println("MIToken:"+aux);
-		if(aux!=null) {
-			//Se devuelve el Token a la lista
+		aux = lexico.getToken();
+		// System.out.println("MIToken:"+aux);
+		if (aux != null) {
+			// Se devuelve el Token a la lista
 			lexico.setBackToken(aux);
 
-			if(aux.getSubType()!=null) {
-				switch(aux.getSubType()) {
+			if (aux.getSubType() != null) {
+				switch (aux.getSubType()) {
 
 				case IF:
-					//Se reconoce un if. Al devolver el Token el metodo IF puede
-					//indicar que espera de inicio un TokenSubType IF.
+					// Se reconoce un if. Al devolver el Token el metodo IF puede
+					// indicar que espera de inicio un TokenSubType IF.
 					IF(t);
-					return true;	
+					return true;
 				case READ:
 					READ();
-					return  true;
+					return true;
 				case WRITE:
 					WRITE();
-					return  true;
+					return true;
 				case WHILE:
-					WHILE();
-					return  true;
+					WHILE(t);
+					return true;
 				case DO:
-					DOWHILE();
+					DOWHILE(t);
 					return true;
 				case INTEGER:
 					DECLARATION();
@@ -188,26 +201,25 @@ public class Parser {
 					DECLARATION();
 					return true;
 				case FOR:
-					FOR();
+					FOR(t);
 					return true;
-	
-				default:break;	
 
+				default:
+					break;
 
 				}
-			}else {
-				switch(aux.getType()) {
+			} else {
+				switch (aux.getType()) {
 
 				case IDENTIFIER:
 					ASIGNACION();
 					return true;
 
 				}
-				
-				
+
 			}
 		}
-		System.out.println("Token No Reconocido ->  "+aux.getLexeme());
+		System.out.println("Token No Reconocido ->  " + aux.getLexeme());
 		return false;
 
 	}
@@ -230,6 +242,7 @@ public class Parser {
 	// DECLARACIONES
 	private void DECLARATION() {
 		Token aux;
+
 		Simbolo s=null;
 		TokenSubType tr;
 		Token tipo;
@@ -276,11 +289,13 @@ public class Parser {
 							error("Error: La variable "+s.getNombre()+" ya fue declarada");
 						
 						//***************************************
+
 					}
-					aux=lexico.getToken();
+					aux = lexico.getToken();
 				}
-				if(aux==null) 
+				if (aux == null)
 					error(TokenSubType.SEMICOLON);
+
 				//
 				s=new Simbolo(nombre.getLexeme(),TokenSubType.INTEGERNUMBER);
 				if(!tablaSimbolos.containsKey(s.getNombre()))
@@ -330,11 +345,13 @@ public class Parser {
 							error("Error: La variable "+s.getNombre()+" ya fue declarada");
 						
 						//***************************************
+
 					}
-					aux=lexico.getToken();
+					aux = lexico.getToken();
 				}
-				if(aux==null) 
+				if (aux == null)
 					error(TokenSubType.SEMICOLON);
+
 				//
 				s=new Simbolo(nombre.getLexeme(),TokenSubType.REALNUMBER);
 				if(!tablaSimbolos.containsKey(s.getNombre()))
@@ -384,11 +401,13 @@ public class Parser {
 							error("Error: La variable "+s.getNombre()+" ya fue declarada");
 						
 						//***************************************
+
 					}
-					aux=lexico.getToken();
+					aux = lexico.getToken();
 				}
-				if(aux==null) 
+				if (aux == null)
 					error(TokenSubType.SEMICOLON);
+
 				//
 				s=new Simbolo(nombre.getLexeme(),TokenSubType.REALNUMBER);
 				if(!tablaSimbolos.containsKey(s.getNombre()))
@@ -438,11 +457,13 @@ public class Parser {
 							error("Error: La variable "+s.getNombre()+" ya fue declarada");
 						
 						//***************************************
+
 					}
-					aux=lexico.getToken();
+					aux = lexico.getToken();
 				}
-				if(aux==null) 
+				if (aux == null)
 					error(TokenSubType.SEMICOLON);
+
 				//
 				s=new Simbolo(nombre.getLexeme(),TokenSubType.REALNUMBER);
 				if(!tablaSimbolos.containsKey(s.getNombre()))
@@ -452,9 +473,9 @@ public class Parser {
 
 				//
 			}else {error(TokenType.IDENTIFIER,aux.getLine());}
+
 		}
 	}
-	
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// READ
@@ -471,7 +492,11 @@ public class Parser {
 			aux = lexico.getToken();
 			if (!se_espera(aux, TokenType.IDENTIFIER)) {
 				error(TokenType.IDENTIFIER, aux.getLine());
+			} else {
+				id = aux.getLexeme();
+				generador.emitir("input " + id);
 			}
+
 			aux = lexico.getToken();
 			salir = se_espera(aux, TokenSubType.COMMA);
 			if (!salir) {
@@ -491,56 +516,69 @@ public class Parser {
 	// WRITE
 	private void WRITE() {
 		Token aux;
-
-		boolean salir=true;
-		aux=lexico.getToken();
-		if(!se_espera(aux,TokenSubType.WRITE))
-			error(TokenSubType.WRITE,aux.getLine());
+		String cadena = "";
+		String expresion = "";
+		boolean salir = true;
+		aux = lexico.getToken();
+		if (!se_espera(aux, TokenSubType.WRITE))
+			error(TokenSubType.WRITE, aux.getLine());
 
 		do {
 
-			aux=lexico.getToken();
-			salir=se_espera(aux,TokenType.STRING);
-			if(!salir) {
+			aux = lexico.getToken();
+			salir = se_espera(aux, TokenType.STRING);
+			if (!salir) {
 
 				lexico.setBackToken(aux);
 				EXPRESION();
-
+				while (!e.isEmpty())
+					expresion = expresion + e.pop();
+				generador.emitir("output " + expresion);
+				expresion = "";
+			} else {
+				cadena = aux.getLexeme();
+				generador.emitir("output " + cadena);
 			}
 
-			aux=lexico.getToken();
-			salir=se_espera(aux,TokenSubType.COMMA);
-			if(!salir) {
-				if(!se_espera(aux,TokenSubType.SEMICOLON)){
-					error(TokenSubType.SEMICOLON,aux.getLine());
+			aux = lexico.getToken();
+			salir = se_espera(aux, TokenSubType.COMMA);
+			if (!salir) {
+				if (!se_espera(aux, TokenSubType.SEMICOLON)) {
+					error(TokenSubType.SEMICOLON, aux.getLine());
 
-				}else {
-					salir=false;
-				}	
+				} else {
+					salir = false;
+				}
 			}
 
-		}while(salir && aux!=null);
+		} while (salir && aux != null);
 
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// ASIGNACION
 	private void ASIGNACION() {
-	Token aux;
-	aux = lexico.getToken();
-	if (!se_espera(aux, TokenType.IDENTIFIER))
-		error(TokenType.IDENTIFIER, aux.getLine());
-	aux = lexico.getToken();
-	if (!se_espera(aux,TokenType.ASSIGNMENT))
-		error(TokenType.ASSIGNMENT,aux.getLine());
-	//<-------------------------------------------------------------------------------------
-	EXPRESION();
-	aux = lexico.getToken();
-	if (!se_espera(aux,TokenSubType.SEMICOLON))
-		error(TokenSubType.SEMICOLON,aux.getLine());
+		String expresion="";
+		String id="";
+		Token aux;
+		aux = lexico.getToken();
+		if (!se_espera(aux, TokenType.IDENTIFIER))
+			error(TokenType.IDENTIFIER, aux.getLine());
+		id= aux.getLexeme();
+			
+		aux = lexico.getToken();
+		if (!se_espera(aux, TokenType.ASSIGNMENT))
+			error(TokenType.ASSIGNMENT, aux.getLine());
+		EXPRESION();
+		while(!e.isEmpty())
+			expresion=expresion+e.pop();
+		generador.emitir("mov"+" "+ id +" "+ expresion);
+		expresion = "";
+		aux = lexico.getToken();
+		if (!se_espera(aux, TokenSubType.SEMICOLON))
+			error(TokenSubType.SEMICOLON, aux.getLine());
 	}
-	
-	
+
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// IF
 	/**
@@ -614,39 +652,40 @@ public class Parser {
 				generador.emitir(t+"ETIQUETA"+etiqueta2+":");
 		}		
 	}
-
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	void LISTA_FUNCIONES() {
 		Token aux;
-		aux=lexico.getToken();
-		while(se_espera(aux,TokenSubType.FUNCTION)) {
+		aux = lexico.getToken();
+		while (se_espera(aux, TokenSubType.FUNCTION)) {
 			lexico.setBackToken(aux);
 			FUNCTION();
-			aux=lexico.getToken();
-		}lexico.setBackToken(aux);
-		
+			aux = lexico.getToken();
+		}
+		lexico.setBackToken(aux);
+
 	}
+
 	// FUNCION
 	void FUNCTION() {
 		Token aux;
-		//aux=lexico.getToken();
-		//if(!se_espera(aux,TokenSubType.INTEGER))
-			//error(TokenSubType.INTEGER);
+		// aux=lexico.getToken();
+		// if(!se_espera(aux,TokenSubType.INTEGER))
+		// error(TokenSubType.INTEGER);
 		TYPE();
-		aux=lexico.getToken();
-		if(!se_espera(aux,TokenSubType.FUNCTION))
+		aux = lexico.getToken();
+		if (!se_espera(aux, TokenSubType.FUNCTION))
 			error(TokenSubType.FUNCTION);
-		aux=lexico.getToken();
-		if(!se_espera(aux,TokenType.IDENTIFIER))
-			error(TokenType.IDENTIFIER,aux.getLine());
-		aux=lexico.getToken();
-		if(!se_espera(aux,TokenSubType.LEFT_PARENTHESIS))
+		aux = lexico.getToken();
+		if (!se_espera(aux, TokenType.IDENTIFIER))
+			error(TokenType.IDENTIFIER, aux.getLine());
+		aux = lexico.getToken();
+		if (!se_espera(aux, TokenSubType.LEFT_PARENTHESIS))
 			error(TokenSubType.LEFT_PARENTHESIS);
 		LISTAP();
-		aux=lexico.getToken();
-		if(!se_espera(aux,TokenSubType.RIGHT_PARENTHESIS))
+		aux = lexico.getToken();
+		if (!se_espera(aux, TokenSubType.RIGHT_PARENTHESIS))
 			error(TokenSubType.RIGHT_PARENTHESIS);
-		
+
 		aux = lexico.getToken();
 		while (!se_espera(aux, TokenSubType.RETURN) && aux != null) {
 
@@ -656,127 +695,199 @@ public class Parser {
 		if (aux == null)
 			error(TokenSubType.RETURN);
 
-		
-		//aux=lexico.getToken();
-		//if(!se_espera(aux,TokenSubType.RETURN))
-			//error(TokenSubType.RETURN);
+		// aux=lexico.getToken();
+		// if(!se_espera(aux,TokenSubType.RETURN))
+		// error(TokenSubType.RETURN);
 		EXPRESION();
-		aux=lexico.getToken();
-		if(!se_espera(aux,TokenSubType.SEMICOLON))
+		aux = lexico.getToken();
+		if (!se_espera(aux, TokenSubType.SEMICOLON))
 			error(TokenSubType.SEMICOLON);
-		aux=lexico.getToken();
-		if(!se_espera(aux,TokenSubType.ENDFUNCTION))
+		aux = lexico.getToken();
+		if (!se_espera(aux, TokenSubType.ENDFUNCTION))
 			error(TokenSubType.ENDFUNCTION);
 	}
-	
+
 	private void TYPE() {
 		Token aux;
-		aux=lexico.getToken();
-		if(!(se_espera(aux,TokenSubType.INTEGER)||se_espera(aux,TokenSubType.REAL)||se_espera(aux,TokenSubType.BOOLEAN)||se_espera(aux,TokenSubType.CHARACTER)))
-			error(TokenType.KEY_WORD,aux.getLine());
+		aux = lexico.getToken();
+		if (!(se_espera(aux, TokenSubType.INTEGER) || se_espera(aux, TokenSubType.REAL)
+				|| se_espera(aux, TokenSubType.BOOLEAN) || se_espera(aux, TokenSubType.CHARACTER)))
+			error(TokenType.KEY_WORD, aux.getLine());
 	}
-	
+
 	private void LISTAP() {
 		Token aux;
-		aux=lexico.getToken();
-		if(se_espera(aux,TokenType.IDENTIFIER)) {
-			aux=lexico.getToken();
-			if(se_espera(aux,TokenSubType.COMMA))
+		aux = lexico.getToken();
+		if (se_espera(aux, TokenType.IDENTIFIER)) {
+			aux = lexico.getToken();
+			if (se_espera(aux, TokenSubType.COMMA))
 				LISTAP();
 			lexico.setBackToken(aux);
 		}
 	}
+
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// WHILE
-	private void WHILE() {
+	private void WHILE(String t) {
+		int etiqueta1, etiqueta2, etiqueta3;
+		String expresion = "";
 		Token aux;
 		aux = lexico.getToken();
 		if (!se_espera(aux, TokenSubType.WHILE))
 			error(TokenSubType.WHILE, aux.getLine());
-		
+		aux = lexico.getToken();
+		if (!se_espera(aux, TokenSubType.LEFT_PARENTHESIS))
+			error(TokenSubType.LEFT_PARENTHESIS);
 		EXPRESION();
+		while (!e.isEmpty())
+			expresion = expresion + e.pop();
+		etiqueta1 = generador.getNumeroEtiqueta();
+		generador.incrementaNumeroEtiqueta();
+		etiqueta2 = generador.getNumeroEtiqueta();
+		generador.incrementaNumeroEtiqueta();
+		etiqueta3 = generador.getNumeroEtiqueta();
+		generador.incrementaNumeroEtiqueta();
+		
+		generador.emitir("ETIQUETA" + etiqueta3 + ":");
+	
+		generador.emitir(t+"cmp " + expresion + " verdadero");
+		generador.emitir(t+"jmpc ETIQUETA" + etiqueta1);
+		generador.emitir(t+"jump ETIQUETA" + etiqueta2);
+		
+		
+		aux = lexico.getToken();
+		if (!se_espera(aux, TokenSubType.RIGHT_PARENTHESIS))
+			error(TokenSubType.RIGHT_PARENTHESIS);
+		aux = lexico.getToken();
+		if (!se_espera(aux, TokenSubType.DO))
+			error(TokenSubType.DO);
+		generador.emitir("ETIQUETA" + etiqueta1 + ":");
 		aux = lexico.getToken();
 		while (!se_espera(aux, TokenSubType.ENDWHILE) && aux != null) {
 			lexico.setBackToken(aux);
 			aux = OPERACIONES("\t");
 		}
+		generador.emitir(t+"jump ETIQUETA" + etiqueta3);
+		generador.emitir("ETIQUETA" + etiqueta2 + ":");
 		if (aux == null)
 			error(TokenSubType.ENDWHILE);
 
 	}
-	//CORREGIDO
+
+	// CORREGIDO
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// DOWHILE
-	private void DOWHILE() {
+	private void DOWHILE(String t) {
+		int etiqueta1;
+		String expresion = "";
 		Token aux;
-		aux=lexico.getToken();
-		if(!se_espera(aux,TokenSubType.DO))
+		aux = lexico.getToken();
+		if (!se_espera(aux, TokenSubType.DO))
 			error(TokenSubType.DO);
-		aux=lexico.getToken();
-		while(!se_espera(aux,TokenSubType.WHILE) && aux!=null) {
+		etiqueta1=generador.getNumeroEtiqueta();
+		generador.emitir("ETIQUETA" + etiqueta1 + ":");
+		aux = lexico.getToken();
+		while (!se_espera(aux, TokenSubType.WHILE) && aux != null) {
 			lexico.setBackToken(aux);
-			aux=OPERACIONES("\t");
-		}if(aux==null) {
+			aux = OPERACIONES("\t");
+		}
+		if (aux == null) {
 			error(TokenSubType.WHILE);
 		}
-		aux=lexico.getToken();
-		if(!se_espera(aux,TokenSubType.LEFT_PARENTHESIS))
+		aux = lexico.getToken();
+		if (!se_espera(aux, TokenSubType.LEFT_PARENTHESIS))
 			error(TokenSubType.LEFT_PARENTHESIS);
 		EXPRESION();
-		aux=lexico.getToken();
-		if(!se_espera(aux,TokenSubType.RIGHT_PARENTHESIS))
+		
+		while (!e.isEmpty())
+			expresion = expresion + e.pop();
+		generador.emitir(t+"cmp " + expresion + " verdadero");
+		aux = lexico.getToken();
+		if (!se_espera(aux, TokenSubType.RIGHT_PARENTHESIS))
 			error(TokenSubType.RIGHT_PARENTHESIS);
-		aux=lexico.getToken();
-		if(!se_espera(aux,TokenSubType.SEMICOLON))
+		generador.emitir(t+"jmpc ETIQUETA" + etiqueta1);
+		aux = lexico.getToken();
+		if (!se_espera(aux, TokenSubType.SEMICOLON))
 			error(TokenSubType.SEMICOLON);
+		
 	}
+
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// FOR
-	private void FOR() {
+	private void FOR(String t) {
+		int etiqueta1, etiqueta2, etiqueta3, etiqueta4;
 		Token aux;
-		aux=lexico.getToken();
-		if(!se_espera(aux,TokenSubType.FOR))
+		String id1, id2, id3, id4;
+		
+		aux = lexico.getToken();
+		if (!se_espera(aux, TokenSubType.FOR))
 			error(TokenSubType.FOR);
-		aux=lexico.getToken();
-		if(!se_espera(aux,TokenType.IDENTIFIER))
-			error(TokenType.IDENTIFIER,aux.getLine());
-		aux=lexico.getToken();
-		if(!se_espera(aux,TokenType.ASSIGNMENT))
-			error(TokenType.ASSIGNMENT,aux.getLine());
-		aux=lexico.getToken();
-		if(!(se_espera(aux,TokenSubType.INTEGERNUMBER)||se_espera(aux,TokenType.IDENTIFIER)))/////////////////
+		aux = lexico.getToken();
+		if (!se_espera(aux, TokenType.IDENTIFIER))
+			error(TokenType.IDENTIFIER, aux.getLine());
+		id1 = aux.getLexeme();
+		aux = lexico.getToken();
+		if (!se_espera(aux, TokenType.ASSIGNMENT))
+			error(TokenType.ASSIGNMENT, aux.getLine());
+		aux = lexico.getToken();
+		if (!(se_espera(aux, TokenSubType.INTEGERNUMBER) || se_espera(aux, TokenType.IDENTIFIER)))/////////////////
 			error("ERROR EN EL VALOR INGRESADO");
-		aux=lexico.getToken();
-		if(!se_espera(aux,TokenSubType.UNTIL))
+//		else {
+			id2 = aux.getLexeme();
+			generador.emitir(t+"mv"+"  " +id1+"  "+ id2);
+//		}
+		aux = lexico.getToken();
+		if (!se_espera(aux, TokenSubType.UNTIL))
 			error(TokenSubType.UNTIL);
-		aux=lexico.getToken();
-		if(!(se_espera(aux,TokenSubType.INTEGERNUMBER)||se_espera(aux,TokenType.IDENTIFIER)))////////////////////
+		aux = lexico.getToken();
+		if (!(se_espera(aux, TokenSubType.INTEGERNUMBER) || se_espera(aux, TokenType.IDENTIFIER)))////////////////////
 			error("ERROR EN EL VALOR INGRESADO");
-		aux=lexico.getToken();
-		if(!se_espera(aux,TokenSubType.LEFT_PARENTHESIS))
+		id3=aux.getLexeme();
+		etiqueta1=generador.getNumeroEtiqueta();
+		generador.incrementaNumeroEtiqueta();
+		etiqueta2=generador.getNumeroEtiqueta();
+		generador.incrementaNumeroEtiqueta();
+		etiqueta3=generador.getNumeroEtiqueta();
+		generador.incrementaNumeroEtiqueta();
+		generador.emitir("ETIQUETA" + etiqueta3 + ":");
+		generador.emitir(t+"cmp"+"  " +id1+"  "+ id3);
+		generador.emitir(t+"jmpc ETIQUETA"+etiqueta1);
+		generador.emitir(t+"jump ETIQUETA"+etiqueta2);
+		
+		
+		aux = lexico.getToken();
+		if (!se_espera(aux, TokenSubType.LEFT_PARENTHESIS))
 			error(TokenSubType.LEFT_PARENTHESIS);
-		aux=lexico.getToken();
-		if(!se_espera(aux,TokenSubType.WITH))
+		aux = lexico.getToken();
+		if (!se_espera(aux, TokenSubType.WITH))
 			error(TokenSubType.WITH);
-		aux=lexico.getToken();
-		if(!se_espera(aux,TokenSubType.STEP))
+		aux = lexico.getToken();
+		if (!se_espera(aux, TokenSubType.STEP))
 			error(TokenSubType.STEP);
-		aux=lexico.getToken();
-		if(!(se_espera(aux,TokenSubType.INTEGERNUMBER)||se_espera(aux,TokenType.IDENTIFIER)))/////////////////////////
+		aux = lexico.getToken();
+		if (!(se_espera(aux, TokenSubType.INTEGERNUMBER) || se_espera(aux, TokenType.IDENTIFIER)))/////////////////////////
 			error("ERROR EN EL VALOR INGRESADO");
-		aux=lexico.getToken();
-		if(!se_espera(aux,TokenSubType.RIGHT_PARENTHESIS))
+		id4 = aux.getLexeme();
+		etiqueta4=generador.getNumeroEtiqueta();
+		generador.incrementaNumeroEtiqueta();
+		aux = lexico.getToken();
+		if (!se_espera(aux, TokenSubType.RIGHT_PARENTHESIS))
 			error(TokenSubType.RIGHT_PARENTHESIS);
-		aux=lexico.getToken();
-		if(!se_espera(aux,TokenSubType.DO))
+		aux = lexico.getToken();
+		if (!se_espera(aux, TokenSubType.DO))
 			error(TokenSubType.DO);
-		aux=lexico.getToken();
-		while(!se_espera(aux,TokenSubType.ENDFOR) && aux!=null) {
+		generador.emitir("ETIQUETA"+ etiqueta1 + ":");
+		aux = lexico.getToken();
+		while (!se_espera(aux, TokenSubType.ENDFOR) && aux != null) {
 			lexico.setBackToken(aux);
-			aux=OPERACIONES("\t");
-		}if(aux==null) {
+			aux = OPERACIONES("\t");
+		}
+		generador.emitir(t+"add " + id1 +" "+ id4);
+		generador.emitir(t+"jump ETIQUETA"+etiqueta3);
+		if (aux == null) {
 			error(TokenSubType.ENDFOR);
 		}
+		generador.emitir("ETIQUETA"+ etiqueta2 + ":");
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -785,38 +896,44 @@ public class Parser {
 	private void EXPRESION() {
 		O();
 	}
+
 	private void O() {
 		Y();
 		OP();
 	}
+
 	private void Y() {
 		C();
 		YP();
 	}
 
-	
-private void YP() {
-		
+	private void YP() {
+
 		Token aux;
-		aux=lexico.getToken();
-		if(aux!=null) {
-			if(aux.getLexeme().equals("&&")) {
+		aux = lexico.getToken();
+		if (aux != null) {
+			if (aux.getLexeme().equals("&&")) {
+				e.add(aux.getLexeme()+"");
 				C();
 				YP();
-			}else {
+				
+			} else {
 				lexico.setBackToken(aux);
-			}}	
+			}
+		}
 	}
+
 	private void OP() {
 		Token aux;
 		aux = lexico.getToken();
-		if(aux!=null) {
-		if (aux.getLexeme().equals("||")) {
-			Y();
-			OP();
-		} else {
-			lexico.setBackToken(aux);
-		}
+		if (aux != null) {
+			if (aux.getLexeme().equals("||")) {
+				e.add(aux.getLexeme()+"");
+				Y();
+				OP();
+			} else {
+				lexico.setBackToken(aux);
+			}
 		}
 	}
 
@@ -828,13 +945,15 @@ private void YP() {
 	private void CP() {
 		Token aux;
 		aux = lexico.getToken();
-		if(aux!=null) {
-		if (aux.getLexeme().equals("==")||aux.getLexeme().equals("!=")) {
-			R();
-			CP();
-		} else {
-			lexico.setBackToken(aux);
-		}}
+		if (aux != null) {
+			if (aux.getLexeme().equals("==") || aux.getLexeme().equals("!=")) {
+				e.add(aux.getLexeme()+"");
+				R();
+				CP();
+			} else {
+				lexico.setBackToken(aux);
+			}
+		}
 
 	}
 
@@ -846,14 +965,16 @@ private void YP() {
 	private void RP() {
 		Token aux;
 		aux = lexico.getToken();
-		if(aux!=null) {
-		if (aux.getLexeme().equals("<")||aux.getLexeme().equals(">")
-				||aux.getLexeme().equals(">=")||aux.getLexeme().equals("<=")) {
-			E();
-			RP();
-		} else {
-			lexico.setBackToken(aux);
-		}}
+		if (aux != null) {
+			if (aux.getLexeme().equals("<") || aux.getLexeme().equals(">") || aux.getLexeme().equals(">=")
+					|| aux.getLexeme().equals("<=")) {
+				e.add(aux.getLexeme()+"");
+				E();
+				RP();
+			} else {
+				lexico.setBackToken(aux);
+			}
+		}
 	}// fin RP
 
 	private void E() {
@@ -863,13 +984,13 @@ private void YP() {
 
 	private void EP() {
 		Token aux;
-		aux=lexico.getToken();
-		if(aux!=null)
-			if(aux.getLexeme().equals("+")||aux.getLexeme().equals("-")) {
-				//e.add(aux.getLexeme()+"");
+		aux = lexico.getToken();
+		if (aux != null)
+			if (aux.getLexeme().equals("+") || aux.getLexeme().equals("-")) {
+				 e.add(aux.getLexeme()+"");
 				T();
 				EP();
-			}else {
+			} else {
 				lexico.setBackToken(aux);
 			}
 	}
@@ -883,13 +1004,13 @@ private void YP() {
 
 	private void TP() {
 		Token aux;
-		aux=lexico.getToken();
-		if(aux!=null)
-			if(aux.getLexeme().equals("*")||aux.getLexeme().equals("/")||aux.getLexeme().equals("%")) {
-				//e.add(aux.getLexeme()+"");
+		aux = lexico.getToken();
+		if (aux != null)
+			if (aux.getLexeme().equals("*") || aux.getLexeme().equals("/") || aux.getLexeme().equals("%")) {
+				e.add(aux.getLexeme()+"");
 				N();
 				TP();
-			}else {
+			} else {
 
 				lexico.setBackToken(aux);
 			}
@@ -899,46 +1020,44 @@ private void YP() {
 	private void N() {
 
 		Token aux;
-		aux=lexico.getToken();
-		if(aux!=null)
-			if(aux.getLexeme().equals("!")) {
-				//e.add(aux.getLexeme()+"");
+		aux = lexico.getToken();
+		if (aux != null)
+			if (aux.getLexeme().equals("!")) {
+				e.add(aux.getLexeme()+"");
 				F();
-			}else {
+			} else {
 				lexico.setBackToken(aux);
 				F();
 			}
 	}
 
-
-		
 	private void F() {
 		Token aux;
-		aux=lexico.getToken();
-		if(!(se_espera(aux,TokenType.IDENTIFIER)|| 
-				se_espera(aux,TokenSubType.INTEGERNUMBER) || 
-				se_espera(aux,TokenSubType.REALNUMBER) )) {
+		aux = lexico.getToken();
+		if (!(se_espera(aux, TokenType.IDENTIFIER) || se_espera(aux, TokenSubType.INTEGERNUMBER)
+				|| se_espera(aux, TokenSubType.REALNUMBER))) {
 
-			if(!(se_espera(aux,TokenSubType.LEFT_PARENTHESIS))){
+			if (!(se_espera(aux, TokenSubType.LEFT_PARENTHESIS))) {
 
-				error("Error en linea "+aux.getLine()+" se espera numero o identificador");				
-			}else {
-				//e.add(aux.getLexeme()+"");
+				error("Error en linea " + aux.getLine() + " se espera numero o identificador");
+			} else {
+				e.add(aux.getLexeme()+"");
 				EXPRESION();
-				aux=lexico.getToken();
-				if(!(se_espera(aux,TokenSubType.RIGHT_PARENTHESIS))){
-					error("Error en linea "+aux.getLine()+" se espera )");				
+				aux = lexico.getToken();
+				if (!(se_espera(aux, TokenSubType.RIGHT_PARENTHESIS))) {
+					error("Error en linea " + aux.getLine() + " se espera )");
 
-				}//else
-					//e.add(aux.getLexeme()+"");
+				} else
+					e.add(aux.getLexeme()+"");
 
 			}
 
 		}
-//		else
-//			e.add(aux.getLexeme()+"");
-		//System.out.println("\t   Operador Expresion:"+aux.getData());
+		else
+		e.add(aux.getLexeme()+"");
+		// System.out.println("\t Operador Expresion:"+aux.getData());
 	}
+
 	
 	
 	///////////////////////////////////////
@@ -976,6 +1095,7 @@ private void YP() {
 		new Parser("ejemploprofe.txt");
 		
 		
+
 
 	}
 	
