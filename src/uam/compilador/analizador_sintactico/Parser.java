@@ -120,9 +120,7 @@ public class Parser {
 			error("El sistema debe iniciarse con un PROCESS");
 		lexico.setBackToken(aux);
 		PROCESS();
-		aux = lexico.getToken();
 		if (aux != null) {
-			lexico.setBackToken(aux);
 			LISTA_FUNCIONES();
 		}
 	}
@@ -656,9 +654,10 @@ public class Parser {
 	void LISTA_FUNCIONES() {
 		Token aux;
 		aux = lexico.getToken();
-		while (se_espera(aux, TokenSubType.FUNCTION)) {
+		while ((se_espera(aux, TokenSubType.INTEGER) || se_espera(aux, TokenSubType.REAL)
+				|| se_espera(aux, TokenSubType.BOOLEAN) || se_espera(aux, TokenSubType.CHARACTER))) {
 			lexico.setBackToken(aux);
-			FUNCTION();
+			FUNCTION("\t");
 			aux = lexico.getToken();
 		}
 		lexico.setBackToken(aux);
@@ -666,18 +665,22 @@ public class Parser {
 	}
 
 	// FUNCION
-	void FUNCTION() {
+	void FUNCTION(String t) {
 		Token aux;
-		// aux=lexico.getToken();
-		// if(!se_espera(aux,TokenSubType.INTEGER))
-		// error(TokenSubType.INTEGER);
+		String lex="";
+		String expresion="";
+		System.out.println("entre a funcion");
+		
 		TYPE();
+		
 		aux = lexico.getToken();
 		if (!se_espera(aux, TokenSubType.FUNCTION))
 			error(TokenSubType.FUNCTION);
 		aux = lexico.getToken();
 		if (!se_espera(aux, TokenType.IDENTIFIER))
 			error(TokenType.IDENTIFIER, aux.getLine());
+		lex=aux.getLexeme();
+		generador.emitir("begin" + " " + lex);
 		aux = lexico.getToken();
 		if (!se_espera(aux, TokenSubType.LEFT_PARENTHESIS))
 			error(TokenSubType.LEFT_PARENTHESIS);
@@ -699,12 +702,17 @@ public class Parser {
 		// if(!se_espera(aux,TokenSubType.RETURN))
 		// error(TokenSubType.RETURN);
 		EXPRESION();
+		//pop es sacar
+		while(!e.isEmpty())
+			expresion=expresion+e.pop();
+		generador.emitir(t+"¡"+expresion+"!");
 		aux = lexico.getToken();
 		if (!se_espera(aux, TokenSubType.SEMICOLON))
 			error(TokenSubType.SEMICOLON);
 		aux = lexico.getToken();
 		if (!se_espera(aux, TokenSubType.ENDFUNCTION))
 			error(TokenSubType.ENDFUNCTION);
+		generador.emitir("end" + " " + lex);
 	}
 
 	private void TYPE() {
@@ -1091,8 +1099,8 @@ public class Parser {
 	
 	public static void main(String[] args) throws IOException {
 		//new Parser("ejemplo.txt");
-		//new Parser("programa1.txt");
-		new Parser("ejemploprofe.txt");
+		new Parser("programa1.txt");
+		//new Parser("ejemploprofe.txt");
 		
 		
 
