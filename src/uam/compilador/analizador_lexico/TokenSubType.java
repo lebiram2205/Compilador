@@ -4,6 +4,7 @@ public enum TokenSubType {
 
 	REALNUMBER("[0-9]+\\.[0-9]+"),
 	INTEGERNUMBER("[0-9]+"), 
+	CHAR("\'(.*?)\'"),
 	COMMA(","), 
 	SEMICOLON(";"), 
 	COLON(":"), 

@@ -10,7 +10,7 @@ public enum TokenType{
 	COMMENT("|//.*|/\\*.*\\*/|"),
 	NUMBER("[0-9]+\\.[0-9]+|[0-9]+"), 
 	PUNCTUATION(",|;|:"), 
-	STRING("\"(.*?)\""), 
+	STRING("\"(.*?)\""),
 	ARITHMETIC_OPERATOR("\\*|/|\\+|-|%"),
 	WHITE_SPACE("[\t|\f|\r|\n]+"),
 	IDENTIFIER("[_[a-zA-Z]][_[a-zA-Z]\\d]*"),

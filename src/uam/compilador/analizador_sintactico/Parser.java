@@ -1,5 +1,9 @@
 package uam.compilador.analizador_sintactico;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.TreeMap;
 
@@ -11,21 +15,30 @@ import uam.compilador.generador_codigo.Generador;
 
 public class Parser {
 	private Alex lexico;
-	private TreeMap<String, Simbolo> tablaSimbolos = new TreeMap<String, Simbolo>();
-	private Generador generador = new Generador();
-	private LinkedList<String> e = new LinkedList<String>();
 
-	Parser(String source) {
+	private static TreeMap<String, Simbolo> tablaSimbolos = new TreeMap<String, Simbolo>();
+	private Generador generador = new Generador(); 
+
+	private LinkedList<String> e = new LinkedList<String>();
+	static File file_simbolos;
+	static BufferedWriter write;
+	int contadoErrores=0;
+
+	Parser(String source) throws IOException {
 
 		lexico = new Alex(source);
 		System.out.println("\nINICIA EL RECONOCIMIENTO");
 		// PROCESS();
 		// FUNCTION();
 		PROGRAM();
+		FileSimbolos();
 		System.out.println("\nTERMINA EL RECONOCIMIENTO");
-		for (Simbolo s : tablaSimbolos.values()) {
+
+		
+		/*for(Simbolo s:tablaSimbolos.values()) {
+
 			System.out.println(s);
-		}
+		}*/
 	}
 
 	/**
@@ -38,7 +51,7 @@ public class Parser {
 	 * @return ---
 	 */
 	private void error(TokenSubType st, int linea) {
-
+		contadoErrores++;
 		System.out.println("\t\tError en la linea " + linea + " se espera " + st.name());
 	}
 
@@ -52,11 +65,12 @@ public class Parser {
 	 * @return ---
 	 */
 	private void error(TokenType tt, int linea) {
-
+		contadoErrores++;
 		System.out.println("\t\tError en la linea " + linea + " se espera " + tt.name());
 	}
 
 	private void error(String string) {
+		contadoErrores++;
 		System.out.println("\t\tError " + string);
 
 	}
@@ -69,7 +83,7 @@ public class Parser {
 	 * @return ---
 	 */
 	private void error(TokenSubType ts) {
-
+		contadoErrores++;
 		System.out.println("\t\tError...se espera " + ts.name());
 
 	}
@@ -183,6 +197,9 @@ public class Parser {
 				case BOOLEAN:
 					DECLARATION();
 					return true;
+				case CHARACTER:
+					DECLARATION();
+					return true;
 				case FOR:
 					FOR(t);
 					return true;
@@ -225,107 +242,238 @@ public class Parser {
 	// DECLARACIONES
 	private void DECLARATION() {
 		Token aux;
-		aux = lexico.getToken();
 
-		if (se_espera(aux, TokenSubType.INTEGER)) {
-			aux = lexico.getToken();
-			if (se_espera(aux, TokenType.IDENTIFIER)) {
-				aux = lexico.getToken();
-				while (!se_espera(aux, TokenSubType.SEMICOLON) && aux != null) {
+		Simbolo s=null;
+		TokenSubType tr;
+		Token tipo;
+		Token nombre;
+		
+		aux=lexico.getToken();
+		
+		if(se_espera(aux,TokenSubType.INTEGER)) {
+			aux=lexico.getToken();
+			if(se_espera(aux,TokenType.IDENTIFIER)) {
+				//
+				nombre=aux;
+				//
+				aux=lexico.getToken();
+				while(!se_espera(aux,TokenSubType.SEMICOLON)&& aux!=null) {
 					lexico.setBackToken(aux);
-					aux = lexico.getToken();
-					if (se_espera(aux, TokenSubType.COMMA)) {
-						aux = lexico.getToken();
-						if (!se_espera(aux, TokenType.IDENTIFIER))
-							error(TokenType.IDENTIFIER, aux.getLine());
-					} else if (se_espera(aux, TokenType.ASSIGNMENT)) {
-						aux = lexico.getToken();
-						if (!se_espera(aux, TokenSubType.INTEGERNUMBER))
-							error(TokenSubType.INTEGERNUMBER, aux.getLine());
+					aux=lexico.getToken();
+					
+					if(se_espera(aux,TokenSubType.COMMA)) {
+						//********
+						 //SE CREA UN Simbolo CON EL LEXEMA Y EL TIPO (INTEGER)
+						s=new Simbolo(nombre.getLexeme(),TokenSubType.INTEGERNUMBER);
+						if(!tablaSimbolos.containsKey(s.getNombre()))
+							tablaSimbolos.put(s.getNombre(), s);
+						else//SI LA VARIABLE YA ESTA DECLARADA, HAY UN ERROR
+							error("Error: La variable "+s.getNombre()+" ya fue declarada");
+						 //********
+						aux=lexico.getToken();
+						if(!se_espera(aux,TokenType.IDENTIFIER))
+							error(TokenType.IDENTIFIER,aux.getLine());
+						//******
+						nombre=aux;
+						//******
+					}else if(se_espera(aux,TokenType.ASSIGNMENT)) {
+						aux=lexico.getToken();
+						if(!se_espera(aux,TokenSubType.INTEGERNUMBER))
+							error(TokenSubType.INTEGERNUMBER,aux.getLine());
+						//***************************
+						s=new Simbolo(nombre.getLexeme(), Integer.parseInt(aux.getLexeme()),TokenSubType.INTEGERNUMBER);
+
+						if(!tablaSimbolos.containsKey(s.getNombre())) 
+							tablaSimbolos.put(s.getNombre(), s);
+						else 
+							error("Error: La variable "+s.getNombre()+" ya fue declarada");
+						
+						//***************************************
+
 					}
 					aux = lexico.getToken();
 				}
 				if (aux == null)
 					error(TokenSubType.SEMICOLON);
-			} else {
-				error(TokenType.IDENTIFIER, aux.getLine());
-			}
+
+				//
+				s=new Simbolo(nombre.getLexeme(),TokenSubType.INTEGERNUMBER);
+				if(!tablaSimbolos.containsKey(s.getNombre()))
+					tablaSimbolos.put(s.getNombre(), s);
+				//else
+					//error("Error: La variable "+s.getNombre()+" ya fue declarada");
+
+				//
+			}else {error(TokenType.IDENTIFIER,aux.getLine());}
 		}
 		///////////////////////////////////////////////////////////////
-		if (se_espera(aux, TokenSubType.REAL)) {
-			aux = lexico.getToken();
-			if (se_espera(aux, TokenType.IDENTIFIER)) {
-				aux = lexico.getToken();
-				while (!se_espera(aux, TokenSubType.SEMICOLON) && aux != null) {
+		if(se_espera(aux,TokenSubType.REAL)) {
+			aux=lexico.getToken();
+			if(se_espera(aux,TokenType.IDENTIFIER)) {
+				//
+				nombre=aux;
+				//
+				aux=lexico.getToken();
+				while(!se_espera(aux,TokenSubType.SEMICOLON)&& aux!=null) {
 					lexico.setBackToken(aux);
-					aux = lexico.getToken();
-					if (se_espera(aux, TokenSubType.COMMA)) {
-						aux = lexico.getToken();
-						if (!se_espera(aux, TokenType.IDENTIFIER))
-							error(TokenType.IDENTIFIER, aux.getLine());
-					} else if (se_espera(aux, TokenType.ASSIGNMENT)) {
-						aux = lexico.getToken();
-						if (!se_espera(aux, TokenSubType.REALNUMBER))
-							error(TokenSubType.REALNUMBER, aux.getLine());
+					aux=lexico.getToken();
+					if(se_espera(aux,TokenSubType.COMMA)) {
+						//********
+						 //SE CREA UN Simbolo CON EL LEXEMA Y EL TIPO (INTEGER)
+						s=new Simbolo(nombre.getLexeme(),TokenSubType.REALNUMBER);
+						if(!tablaSimbolos.containsKey(s.getNombre()))
+							tablaSimbolos.put(s.getNombre(), s);
+						else//SI LA VARIABLE YA ESTA DECLARADA, HAY UN ERROR
+							error("Error: La variable "+s.getNombre()+" ya fue declarada");
+						 //********
+						aux=lexico.getToken();
+						if(!se_espera(aux,TokenType.IDENTIFIER))
+							error(TokenType.IDENTIFIER,aux.getLine());
+						//******
+						nombre=aux;
+						//******
+					}else if(se_espera(aux,TokenType.ASSIGNMENT)) {
+						aux=lexico.getToken();
+						if(!se_espera(aux,TokenSubType.REALNUMBER))
+							error(TokenSubType.REALNUMBER,aux.getLine());
+						//***************************
+						s=new Simbolo(nombre.getLexeme(), Double.parseDouble(aux.getLexeme()),TokenSubType.REALNUMBER);
+
+						if(!tablaSimbolos.containsKey(s.getNombre())) 
+							tablaSimbolos.put(s.getNombre(), s);
+						else 
+							error("Error: La variable "+s.getNombre()+" ya fue declarada");
+						
+						//***************************************
+
 					}
 					aux = lexico.getToken();
 				}
 				if (aux == null)
 					error(TokenSubType.SEMICOLON);
-			} else {
-				error(TokenType.IDENTIFIER, aux.getLine());
-			}
+
+				//
+				s=new Simbolo(nombre.getLexeme(),TokenSubType.REALNUMBER);
+				if(!tablaSimbolos.containsKey(s.getNombre()))
+					tablaSimbolos.put(s.getNombre(), s);
+				//else
+					//error("Error: La variable "+s.getNombre()+" ya fue declarada");
+
+				//
+			}else {error(TokenType.IDENTIFIER,aux.getLine());}
 		}
 		//////////////////////////////////////////////////////////////////
-		if (se_espera(aux, TokenSubType.BOOLEAN)) {
-			aux = lexico.getToken();
-			if (se_espera(aux, TokenType.IDENTIFIER)) {
-				aux = lexico.getToken();
-				while (!se_espera(aux, TokenSubType.SEMICOLON) && aux != null) {
+		if(se_espera(aux,TokenSubType.BOOLEAN)) {
+			aux=lexico.getToken();
+			if(se_espera(aux,TokenType.IDENTIFIER)) {
+				//
+				nombre=aux;
+				//
+				aux=lexico.getToken();
+				while(!se_espera(aux,TokenSubType.SEMICOLON)&& aux!=null) {
 					lexico.setBackToken(aux);
-					aux = lexico.getToken();
-					if (se_espera(aux, TokenSubType.COMMA)) {
-						aux = lexico.getToken();
-						if (!se_espera(aux, TokenType.IDENTIFIER))
-							error(TokenType.IDENTIFIER, aux.getLine());
-					} else if (se_espera(aux, TokenType.ASSIGNMENT)) {
-						aux = lexico.getToken();
-						if (!(se_espera(aux, TokenSubType.TRUE) || se_espera(aux, TokenSubType.FALSE)))
-							error(TokenSubType.BOOLEAN, aux.getLine());
+					aux=lexico.getToken();
+					if(se_espera(aux,TokenSubType.COMMA)) {
+						//********
+						 //SE CREA UN Simbolo CON EL LEXEMA Y EL TIPO (INTEGER)
+						s=new Simbolo(nombre.getLexeme(),TokenSubType.BOOLEAN);
+						if(!tablaSimbolos.containsKey(s.getNombre()))
+							tablaSimbolos.put(s.getNombre(), s);
+						else//SI LA VARIABLE YA ESTA DECLARADA, HAY UN ERROR
+							error("Error: La variable "+s.getNombre()+" ya fue declarada");
+						 //********
+						aux=lexico.getToken();
+						if(!se_espera(aux,TokenType.IDENTIFIER))
+							error(TokenType.IDENTIFIER,aux.getLine());
+						//******
+						nombre=aux;
+						//******
+					}else if(se_espera(aux,TokenType.ASSIGNMENT)) {
+						aux=lexico.getToken();
+						if(!(se_espera(aux,TokenSubType.TRUE)||se_espera(aux,TokenSubType.FALSE)))
+							error(TokenSubType.BOOLEAN,aux.getLine());
+						//***************************
+						s=new Simbolo(nombre.getLexeme(), Boolean.parseBoolean(aux.getLexeme()),TokenSubType.BOOLEAN);
+
+						if(!tablaSimbolos.containsKey(s.getNombre())) 
+							tablaSimbolos.put(s.getNombre(), s);
+						else 
+							error("Error: La variable "+s.getNombre()+" ya fue declarada");
+						
+						//***************************************
+
 					}
 					aux = lexico.getToken();
 				}
 				if (aux == null)
 					error(TokenSubType.SEMICOLON);
-			} else {
-				error(TokenType.IDENTIFIER, aux.getLine());
-			}
+
+				//
+				s=new Simbolo(nombre.getLexeme(),TokenSubType.REALNUMBER);
+				if(!tablaSimbolos.containsKey(s.getNombre()))
+					tablaSimbolos.put(s.getNombre(), s);
+				//else
+					//error("Error: La variable "+s.getNombre()+" ya fue declarada");
+
+				//
+			}else {error(TokenType.IDENTIFIER,aux.getLine());}
 		}
 		////////////////////////////////////////////////////////////////
-		if (se_espera(aux, TokenSubType.CHARACTER)) {
-			aux = lexico.getToken();
-			if (se_espera(aux, TokenType.IDENTIFIER)) {
-				aux = lexico.getToken();
-				while (!se_espera(aux, TokenSubType.SEMICOLON) && aux != null) {
+		if(se_espera(aux,TokenSubType.CHARACTER)) {
+			aux=lexico.getToken();
+			if(se_espera(aux,TokenType.IDENTIFIER)) {
+				//
+				nombre=aux;
+				//
+				aux=lexico.getToken();
+				while(!se_espera(aux,TokenSubType.SEMICOLON)&& aux!=null) {
 					lexico.setBackToken(aux);
-					aux = lexico.getToken();
-					if (se_espera(aux, TokenSubType.COMMA)) {
-						aux = lexico.getToken();
-						if (!se_espera(aux, TokenType.IDENTIFIER))
-							error(TokenType.IDENTIFIER, aux.getLine());
-					} else if (se_espera(aux, TokenType.ASSIGNMENT)) {
-						aux = lexico.getToken();
-						if (!se_espera(aux, TokenSubType.CHARACTER))// no hay declaracion alguna para un caracter en
-																	// tokensubtype
-							error(TokenSubType.CHARACTER, aux.getLine());
+					aux=lexico.getToken();
+					if(se_espera(aux,TokenSubType.COMMA)) {
+						//********
+						 //SE CREA UN Simbolo CON EL LEXEMA Y EL TIPO (INTEGER)
+						s=new Simbolo(nombre.getLexeme(),TokenSubType.CHAR);
+						if(!tablaSimbolos.containsKey(s.getNombre()))
+							tablaSimbolos.put(s.getNombre(), s);
+						else//SI LA VARIABLE YA ESTA DECLARADA, HAY UN ERROR
+							error("Error: La variable "+s.getNombre()+" ya fue declarada");
+						 //********
+						aux=lexico.getToken();
+						if(!se_espera(aux,TokenType.IDENTIFIER))
+							error(TokenType.IDENTIFIER,aux.getLine());
+						//******
+						nombre=aux;
+						//******
+					}else if(se_espera(aux,TokenType.ASSIGNMENT)) {
+						aux=lexico.getToken();
+						if(!se_espera(aux,TokenSubType.CHAR))//no hay declaracion alguna para un caracter en tokensubtype
+							error("ERROR RECIBE UN CARACTER");
+						//***************************
+						s=new Simbolo(nombre.getLexeme(), aux.getLexeme() ,TokenSubType.CHAR);
+
+						if(!tablaSimbolos.containsKey(s.getNombre())) 
+							tablaSimbolos.put(s.getNombre(), s);
+						else 
+							error("Error: La variable "+s.getNombre()+" ya fue declarada");
+						
+						//***************************************
+
 					}
 					aux = lexico.getToken();
 				}
 				if (aux == null)
 					error(TokenSubType.SEMICOLON);
-			} else {
-				error(TokenType.IDENTIFIER, aux.getLine());
-			}
+
+				//
+				s=new Simbolo(nombre.getLexeme(),TokenSubType.REALNUMBER);
+				if(!tablaSimbolos.containsKey(s.getNombre()))
+					tablaSimbolos.put(s.getNombre(), s);
+				//else
+					//error("Error: La variable "+s.getNombre()+" ya fue declarada");
+
+				//
+			}else {error(TokenType.IDENTIFIER,aux.getLine());}
+
 		}
 	}
 
@@ -910,11 +1058,46 @@ public class Parser {
 		// System.out.println("\t Operador Expresion:"+aux.getData());
 	}
 
-	public static void main(String[] args) {
-		// new Parser("ejemplo.txt");
-		new Parser("programa1.txt");
-		// new Parser("ejemploprofe.txt");
+	
+	
+	///////////////////////////////////////
+	//////////////////////////////////////
+	
+	private void FileSimbolos() throws IOException{
+		String aux = "";
+		//int errores=0;
+		file_simbolos = new File("src/file_simbolos.txt");
+		if (contadoErrores==0) {
+			System.out.println("\nSe creo el archivo txt");
+
+
+			// Escribimos en el archivo con el metodo write
+			write = new BufferedWriter(new FileWriter(file_simbolos));
+			write.write("Tabla de simbolos: \n");
+			for (Simbolo s : tablaSimbolos.values()) {
+				aux = s.toString();
+				write.write("\n" + aux);
+			}
+			write.close();
+
+		} else {
+			System.out.println("\nNo se pudo crear el archivo porque hay ERRORES");
+		}
+	}
+	
+	
+	/////////////////////////////////////
+	////////////////////////////////////////
+	
+	public static void main(String[] args) throws IOException {
+		//new Parser("ejemplo.txt");
+		//new Parser("programa1.txt");
+		new Parser("ejemploprofe.txt");
+		
+		
+
 
 	}
+	
 
 }
